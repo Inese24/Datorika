@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algoritmu varde — skolēnu versija</title>
+  <style>
+
+    :root{
+      --bg:#0f172a; --card:#111827; --ink:#f8fafc; --muted:#cbd5e1;
+      --accent:#22c55e; --accent2:#facc15; --danger:#fb7185;
+      --grid:rgba(203,213,225,.38); --soft:#163522; --frog:#22c55e; --water:#172554;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top left,rgba(34,197,94,.20) 0,transparent 34%),
+                 radial-gradient(circle at bottom right,rgba(59,130,246,.22) 0,transparent 38%),
+                 linear-gradient(135deg,#020617 0%,#0f172a 55%,#111827 100%);
+      color:var(--ink); min-height:100vh;
+    }
+    header{padding:18px 20px 10px;text-align:center}
+    h1{margin:0 0 6px;font-size:clamp(1.6rem,4vw,2.6rem)}
+    .subtitle{margin:0 auto;color:var(--muted);max-width:850px;line-height:1.45}
+    main{max-width:1100px;margin:0 auto;padding:12px 16px 32px}
+    .topbar{
+      display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      background:rgba(15,23,42,.86);border:1px solid rgba(148,163,184,.28);
+      border-radius:18px;padding:12px;box-shadow:0 12px 36px rgba(0,0,0,.32);
+      margin-bottom:16px;backdrop-filter:blur(8px);
+    }
+    .progress{font-weight:700}
+    .score-panel{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;font-weight:800}
+    .score-pill{background:#020617;border:1px solid rgba(148,163,184,.35);border-radius:999px;padding:6px 10px;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+    .score-plus{color:#86efac}.score-minus{color:#fda4af}
+    .small{font-size:.94rem;color:var(--muted)}
+    .level-nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+    .level-dot{border:1px solid rgba(148,163,184,.32);background:#020617;color:var(--ink);min-width:36px;height:36px;border-radius:999px;cursor:pointer;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.28)}
+    .level-dot.active{background:var(--accent);color:#052e16;border-color:var(--accent)}
+    .level-dot.done{outline:3px solid var(--accent2)}
+    .layout{display:grid;grid-template-columns:minmax(290px,1fr) minmax(280px,410px);gap:16px;align-items:start}
+    @media (max-width:850px){.layout{grid-template-columns:1fr}}
+    .card{background:rgba(17,24,39,.94);border:1px solid rgba(148,163,184,.26);border-radius:22px;padding:18px;box-shadow:0 18px 45px rgba(0,0,0,.38)}
+    .level-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+    .level-title h2{margin:0;font-size:1.55rem}
+    .badge{background:#14532d;color:#dcfce7;border-radius:999px;padding:6px 10px;font-weight:700;font-size:.9rem}
+    .instruction{font-size:1.05rem;line-height:1.5;margin:10px 0 14px}
+    .game-area{position:relative;margin:auto;max-width:520px}
+    .grid{position:relative;display:grid;gap:0;width:min(84vw,500px);aspect-ratio:1/1;margin:auto;background:radial-gradient(circle at center,rgba(96,165,250,.22),transparent 65%),var(--water);border:4px solid rgba(134,239,172,.65);border-radius:18px;overflow:hidden;box-shadow:inset 0 0 28px rgba(0,0,0,.25)}
+    .cell{border-right:1px dashed var(--grid);border-bottom:1px dashed var(--grid);background:rgba(255,255,255,.05)}
+    .cell:nth-child(odd){background:rgba(255,255,255,.025)}
+    .marker{position:absolute;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;font-weight:900;z-index:4}
+    .start{background:#38bdf8;color:#082f49;box-shadow:0 2px 12px rgba(56,189,248,.5)}
+    .target{background:var(--accent2);color:#422006;box-shadow:0 2px 12px rgba(250,204,21,.42)}
+    .crumb{position:absolute;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(250,204,21,.62);border:2px solid rgba(254,240,138,.85);z-index:2;box-shadow:0 0 10px rgba(250,204,21,.35)}
+    .frog{position:absolute;width:38px;height:38px;transform:translate(-50%,-50%);border-radius:50%;background:var(--frog);color:#052e16;display:grid;place-items:center;font-size:1.4rem;z-index:5;box-shadow:0 6px 18px rgba(34,197,94,.35);transition:left .22s,top .22s;font-weight:900}
+    svg.path{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+    .command-box{min-height:64px;background:#020617;border:2px dashed rgba(134,239,172,.45);border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+    .arrow-chip{min-width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.35);background:#0f172a;color:#f8fafc;display:grid;place-items:center;font-size:1.5rem;font-weight:900;box-shadow:0 2px 10px rgba(0,0,0,.24)}
+    .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+    button{font:inherit}
+    .btn{border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:11px 12px;background:#0f172a;color:#f8fafc;cursor:pointer;font-weight:800;box-shadow:0 3px 12px rgba(0,0,0,.24)}
+    .btn:hover{transform:translateY(-1px);background:#1e293b}
+    .btn.primary{background:#16a34a;color:#f0fdf4;border-color:#22c55e}
+    .btn.primary:hover{background:#15803d}
+    .btn.warn{background:#713f12;color:#fef3c7;border-color:#a16207}
+    .btn.warn:hover{background:#854d0e}
+    .btn.danger{background:#7f1d1d;color:#ffe4e6;border-color:#be123c}
+    .btn.danger:hover{background:#991b1b}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .message{margin-top:12px;padding:12px;border-radius:14px;background:#020617;color:var(--muted);min-height:48px;line-height:1.4;border:1px solid rgba(148,163,184,.20)}
+    .message.ok{background:#052e16;color:#bbf7d0;border-color:#16a34a}
+    .message.bad{background:#450a0a;color:#fecaca;border-color:#dc2626}
+    .teacher{margin-top:12px;border-top:1px solid rgba(148,163,184,.24);padding-top:12px}
+    .solution{display:none;margin-top:8px;background:#020617;border:1px solid rgba(148,163,184,.24);border-radius:14px;padding:10px;line-height:1.9;font-size:1.25rem;letter-spacing:.08em;word-break:break-word;color:#f8fafc}
+    .solution.show{display:block}
+    .page-controls{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+    .task-note{background:#071b12;border-left:5px solid var(--accent);border-radius:12px;padding:10px 12px;color:#dcfce7;margin-top:12px;line-height:1.45}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Algoritmu varde</h1>
+    <p class="subtitle">Katrā lapā skolēns sastāda bultu algoritmu, lai varde izietu pēdu ceļu. Uzdevumi veidoti pēc bultu zīmēšanas principa: sākam no zilā punkta, izpildām komandas pēc kārtas.</p>
+  </header>
+
+  <main>
+    <section class="topbar" aria-label="Uzdevumu izvēlne">
+      <div>
+        <div class="progress" id="progressText">1. uzdevums no 13</div>
+        <div class="score-panel" aria-live="polite">
+          <span class="score-pill">Punkti: <span id="scoreText">0</span></span>
+          <span class="score-pill score-plus">Pareizi: <span id="correctText">0</span></span>
+          <span class="score-pill score-minus">Nepareizi: <span id="wrongText">0</span></span>
+        </div>
+        <div class="small">Mērķis: saprast, ka algoritms ir precīza darbību secība. Par katru jaunu pareizu algoritma variantu +1 punkts, par nepareizu atbildi −1 punkts. 7., 8., 10.–13. uzdevumā punktu var iegūt par katru no diviem pareizajiem virzieniem; pēc pareizas pārbaudes ievades lauks notīrās automātiski. Uzdevumus var veikt atkārtoti neierobežotu reižu skaitu.</div>
+      </div>
+      <nav class="level-nav" id="levelNav"></nav>
+    </section>
+
+    <section class="layout">
+      <article class="card">
+        <div class="level-title">
+          <h2 id="levelTitle">1. uzdevums</h2>
+          <span class="badge" id="stepCount">4 soļi</span>
+        </div>
+        <p class="instruction" id="instruction">
+          Izvēlies bultas pareizā secībā. Dažos uzdevumos der vairāk nekā viens pareizs algoritms: to pašu ceļu var iziet arī pretējā virzienā.
+        </p>
+        <div class="game-area">
+          <div class="grid" id="grid" aria-label="Spēles režģis"></div>
+        </div>
+        <div class="task-note" id="taskNote">
+          Padoms: algoritmu lasa no kreisās uz labo pusi. Katra bulta ir viena komanda.
+        </div>
+      </article>
+
+      <aside class="card">
+        <h2 style="margin-top:0">Tavs algoritms</h2>
+        <div class="command-box" id="commandBox" aria-live="polite">
+          <span class="small">Spied bultas zemāk.</span>
+        </div>
+
+        <div class="palette" aria-label="Bultu pogas">
+          <button class="btn" data-arrow="↑" aria-label="Uz augšu">↑</button>
+          <button class="btn" data-arrow="↓" aria-label="Uz leju">↓</button>
+          <button class="btn" data-arrow="←" aria-label="Pa kreisi">←</button>
+          <button class="btn" data-arrow="→" aria-label="Pa labi">→</button>
+          <button class="btn" data-arrow="↖" aria-label="Slīpi uz augšu pa kreisi">↖</button>
+          <button class="btn" data-arrow="↗" aria-label="Slīpi uz augšu pa labi">↗</button>
+          <button class="btn" data-arrow="↙" aria-label="Slīpi uz leju pa kreisi">↙</button>
+          <button class="btn" data-arrow="↘" aria-label="Slīpi uz leju pa labi">↘</button>
+          <button class="btn warn" id="undoBtn">Dzēst soli</button>
+          <button class="btn danger" id="clearBtn">Sākt no jauna</button>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="runBtn">Pārbaudīt</button>
+          <button class="btn" id="animateBtn">Rādīt manu ceļu</button>
+          <button class="btn" id="hintBtn">Norāde</button>
+          <button class="btn warn" id="repeatBtn">Veikt šo uzdevumu vēlreiz</button>
+          <button class="btn danger" id="resetProgressBtn">Notīrīt visus rezultātus</button>
+        </div>
+        <div class="message" id="message">Sastādi algoritmu un pārbaudi to.</div>
+
+        <div class="page-controls">
+          <button class="btn" id="prevBtn">Iepriekšējais</button>
+          <button class="btn primary" id="nextBtn">Nākamais</button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const tasks = [
+      {id:1, arrows:"↓↓→→", note:"Īss algoritms: vispirms divi soļi uz leju, pēc tam divi soļi pa labi."},
+      {id:2, arrows:"←←←↓", note:"Algoritms var sākties arī ar kustību pa kreisi."},
+      {id:3, arrows:"↑→↑↑", note:"Svarīgi ievērot secību: viena bulta maina nākamo pozīciju."},
+      {id:4, arrows:"→→↓←←", note:"Ceļš var vest atpakaļ, ne tikai uz priekšu."},
+      {id:5, arrows:"→↓↓→→", note:"Algoritmu var sadalīt daļās: pa labi, uz leju, pa labi."},
+      {id:6, arrows:"↓→↓→↓", note:"Atkārtojas līdzīgs raksts: leju, pa labi, leju, pa labi, leju."},
+      {id:7, arrows:"↓↓→→↑←↑←", solutions:["↓↓→→↑←↑←", "→↓→↓←←↑↑"], note:"Šajā uzdevumā varde atgriežas sākumpunktā. Der divi virzieni: pa labi vai pa kreisi. Punktu var iegūt par katru virzienu."},
+      {id:8, arrows:"→→→↑←←←↓", solutions:["→→→↑←←←↓", "↑→→→↓←←←"], note:"Algoritms var izveidot taisnstūra malu un atgriezties. Der divi virzieni: pa labi vai pa kreisi. Punktu var iegūt par katru virzienu."},
+      {id:9, arrows:"→↓→→↓↓←←←", note:"Garāks ceļš jālasa rūpīgi, pa vienam solim."},
+      {id:10, arrows:"→→→↓←↓←↑←↑", solutions:["→→→↓←↓←↑←↑", "↓→↓→↑→↑←←←"], note:"Ja kļūdies, izmanto pogu “Dzēst soli” un labo algoritmu. Šim ceļam pieņemti divi sākuma virzieni. Punktu var iegūt par katru virzienu."},
+      {id:11, arrows:"↓←↓→↓→↑→↑←↑←", solutions:["↓←↓→↓→↑→↑←↑←", "→↓→↓←↓←↑←↑→↑"], note:"Šeit ir vairāk pagriezienu, tāpēc noder skaļa soļu nosaukšana. Pieņemti divi simetriski risinājumi. Punktu var iegūt par katru virzienu."},
+      {id:12, arrows:"→→→→↑↑↖↖↙↙↓↓", solutions:["→→→→↑↑↖↖↙↙↓↓", "↑↑↗↗↘↘↓↓←←←←"], note:"Šajā uzdevumā ir arī slīpās bultas. Pieņemti divi virzieni: pa labi vai pa kreisi. Punktu var iegūt par katru virzienu."},
+      {id:13, arrows:"↓↓↓→→↓←→→→←↑→→↑↑↑←←←←←", solutions:["↓↓↓→→↓←→→→←↑→→↑↑↑←←←←←", "→→→→→↓↓↓←←↓→←←←→↑←←↑↑↑"], note:"Noslēguma uzdevums: garš algoritms ar daudziem soļiem. Pieņemti divi sākuma virzieni. Punktu var iegūt par katru virzienu."}
+    ];
+
+    const dir = {
+      "→":[1,0], "←":[-1,0], "↑":[0,-1], "↓":[0,1],
+      "↖":[-1,-1], "↙":[-1,1], "↗":[1,-1], "↘":[1,1]
+    };
+
+    let current = 0;
+    let user = [];
+    let done = new Set();
+    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let scoredSolutions = new Set();
+    let showSolution = false;
+
+    const grid = document.getElementById("grid");
+    const commandBox = document.getElementById("commandBox");
+    const message = document.getElementById("message");
+    const solution = document.getElementById("solution");
+    const nav = document.getElementById("levelNav");
+
+    function acceptedSolutions(task){
+      return task.solutions || [task.arrows];
+    }
+
+    function pathFor(arrows){
+      let x = 0, y = 0;
+      const points = [{x,y}];
+      for(const a of arrows){
+        x += dir[a][0];
+        y += dir[a][1];
+        points.push({x,y});
+      }
+      return points;
+    }
+
+    function bounds(points){
+      return {
+        minX: Math.min(...points.map(p=>p.x)),
+        maxX: Math.max(...points.map(p=>p.x)),
+        minY: Math.min(...points.map(p=>p.y)),
+        maxY: Math.max(...points.map(p=>p.y))
+      };
+    }
+
+    function taskLayout(task){
+      const points = pathFor(task.arrows);
+      const b = bounds(points);
+      const width = Math.max(6, b.maxX - b.minX + 3);
+      const height = Math.max(6, b.maxY - b.minY + 3);
+      const size = Math.max(width, height);
+      const offsetX = Math.floor((size - (b.maxX - b.minX + 1))/2) - b.minX;
+      const offsetY = Math.floor((size - (b.maxY - b.minY + 1))/2) - b.minY;
+      return {points, size, offsetX, offsetY};
+    }
+
+    function posToPercent(p, layout){
+      const cell = 100 / layout.size;
+      return {
+        left: (p.x + layout.offsetX + 0.5) * cell,
+        top: (p.y + layout.offsetY + 0.5) * cell
+      };
+    }
+
+    function drawGrid(){
+      const task = tasks[current];
+      const layout = taskLayout(task);
+      grid.innerHTML = "";
+      grid.style.gridTemplateColumns = `repeat(${layout.size}, 1fr)`;
+      grid.style.gridTemplateRows = `repeat(${layout.size}, 1fr)`;
+
+      for(let i=0;i<layout.size*layout.size;i++){
+        const c = document.createElement("div");
+        c.className = "cell";
+        grid.appendChild(c);
+      }
+
+      const unique = new Map();
+      layout.points.forEach((p, i) => {
+        const key = p.x + "," + p.y;
+        if(i > 0 && i < layout.points.length - 1 && !unique.has(key)) unique.set(key, p);
+      });
+      unique.forEach(p => addMarker("crumb", "•", p, layout));
+
+      drawSvgPath(layout.points, layout);
+
+      addMarker("marker start", "S", layout.points[0], layout);
+      addMarker("marker target", "★", layout.points[layout.points.length-1], layout);
+      addFrog(layout.points[0], layout);
+    }
+
+    function drawSvgPath(points, layout){
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "path");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      const d = points.map(p => {
+        const q = posToPercent(p, layout);
+        return `${q.left},${q.top}`;
+      }).join(" ");
+      poly.setAttribute("points", d);
+      poly.setAttribute("fill", "none");
+      poly.setAttribute("stroke", "rgba(46,125,50,.35)");
+      poly.setAttribute("stroke-width", "1.8");
+      poly.setAttribute("stroke-linecap", "round");
+      poly.setAttribute("stroke-linejoin", "round");
+      svg.appendChild(poly);
+      grid.appendChild(svg);
+    }
+
+    function addMarker(cls, text, p, layout){
+      const m = document.createElement("div");
+      m.className = cls;
+      m.textContent = text;
+      const q = posToPercent(p, layout);
+      m.style.left = q.left + "%";
+      m.style.top = q.top + "%";
+      grid.appendChild(m);
+    }
+
+    function addFrog(p, layout){
+      const f = document.createElement("div");
+      f.className = "frog";
+      f.id = "frog";
+      f.textContent = "V";
+      const q = posToPercent(p, layout);
+      f.style.left = q.left + "%";
+      f.style.top = q.top + "%";
+      grid.appendChild(f);
+    }
+
+    function renderNav(){
+      nav.innerHTML = "";
+      tasks.forEach((t, i) => {
+        const b = document.createElement("button");
+        b.className = "level-dot" + (i === current ? " active" : "") + (done.has(t.id) ? " done" : "");
+        b.textContent = t.id;
+        b.title = `${t.id}. uzdevums`;
+        b.addEventListener("click", () => goTo(i));
+        nav.appendChild(b);
+      });
+    }
+
+    function renderScore(){
+      document.getElementById("scoreText").textContent = score;
+      document.getElementById("correctText").textContent = correctCount;
+      document.getElementById("wrongText").textContent = wrongCount;
+    }
+
+    function render(){
+      const task = tasks[current];
+      document.getElementById("progressText").textContent = `${task.id}. uzdevums no ${tasks.length}`;
+      document.getElementById("levelTitle").textContent = `${task.id}. uzdevums`;
+      const accepted = acceptedSolutions(task);
+      const stepLengths = [...new Set(accepted.map(s => s.length))];
+      document.getElementById("stepCount").textContent = stepLengths.length === 1 ? `${stepLengths[0]} soļi` : `${stepLengths.join(" vai ")} soļi`;
+      document.getElementById("taskNote").textContent = task.note;
+      document.getElementById("prevBtn").disabled = current === 0;
+      document.getElementById("nextBtn").disabled = current === tasks.length - 1;
+      if(solution){
+        solution.innerHTML = acceptedSolutions(task)
+          .map((s, i) => `${i + 1}. variants: ${s.split("").join(" ")}`)
+          .join("<br>");
+        solution.classList.toggle("show", showSolution);
+      }
+      drawGrid();
+      renderCommandBox();
+      renderNav();
+      renderScore();
+      setMessage("Sastādi algoritmu un pārbaudi to.", "");
+      location.hash = "uzdevums-" + task.id;
+    }
+
+    function renderCommandBox(){
+      commandBox.innerHTML = "";
+      if(user.length === 0){
+        const span = document.createElement("span");
+        span.className = "small";
+        span.textContent = "Spied bultas zemāk.";
+        commandBox.appendChild(span);
+        return;
+      }
+      user.forEach(a => {
+        const chip = document.createElement("span");
+        chip.className = "arrow-chip";
+        chip.textContent = a;
+        commandBox.appendChild(chip);
+      });
+    }
+
+    function setMessage(text, type){
+      message.textContent = text;
+      message.className = "message" + (type ? " " + type : "");
+    }
+
+    function addArrow(a){
+      if(user.length >= tasks[current].arrows.length + 4){
+        setMessage("Algoritms kļūst pārāk garš. Izdzēs liekos soļus.", "bad");
+        return;
+      }
+      user.push(a);
+      renderCommandBox();
+    }
+
+    function check(){
+      const task = tasks[current];
+      const submitted = [...user];
+      const answer = submitted.join("");
+      const accepted = acceptedSolutions(task);
+
+      if(accepted.includes(answer)){
+        const solutionIndex = accepted.indexOf(answer);
+        const scoreKey = `${task.id}-${solutionIndex}`;
+        const totalForTask = accepted.length;
+        const wasAlreadyScored = scoredSolutions.has(scoreKey);
+
+        if(!wasAlreadyScored){
+          scoredSolutions.add(scoreKey);
+          score += 1;
+          correctCount += 1;
+        }
+
+        const solvedForTask = [...scoredSolutions].filter(k => k.startsWith(`${task.id}-`)).length;
+        if(solvedForTask === totalForTask){
+          done.add(task.id);
+        }
+
+        // Pēc pareizas atbildes ievades lauks tiek automātiski notīrīts,
+        // lai skolēns otru virzienu varētu ievadīt kā jaunu atbildi, nevis
+        // nejauši pievienotu to jau pabeigtajam algoritmam.
+        if(wasAlreadyScored){
+          setMessage("Pareizi, bet šis variants jau bija izpildīts. Papildu punkts netiek piešķirts. Ievades lauks ir notīrīts.", "ok");
+        } else if(totalForTask > 1 && solvedForTask < totalForTask){
+          setMessage(`Pareizi. +1 punkts. Tagad ievadi otru virzienu. Iegūti ${solvedForTask} no ${totalForTask} punktiem.`, "ok");
+        } else if(totalForTask > 1){
+          setMessage(`Pareizi. +1 punkts. Šim uzdevumam izpildīti abi virzieni: ${solvedForTask} no ${totalForTask} punktiem.`, "ok");
+        } else {
+          setMessage("Pareizi. +1 punkts. Ievades lauks ir notīrīts, lai vari mēģināt vēlreiz.", "ok");
+        }
+
+        renderScore();
+        renderNav();
+        animate(submitted);
+        user = [];
+        renderCommandBox();
+      } else {
+        score -= 1;
+        wrongCount += 1;
+        renderScore();
+        const possibleLengths = [...new Set(accepted.map(s => [...s].length))];
+        const answerChars = [...answer];
+        const closest = accepted
+          .map(s => {
+            const chars = [...s];
+            const wrongAt = answerChars.findIndex((a, i) => a !== chars[i]);
+            return {s, chars, samePrefix: wrongAt === -1 ? Math.min(answerChars.length, chars.length) : wrongAt};
+          })
+          .sort((a, b) => b.samePrefix - a.samePrefix)[0];
+        const firstWrong = submitted.findIndex((a, i) => a !== closest.chars[i]);
+        if(!possibleLengths.includes(submitted.length)){
+          setMessage(`Nepareizi. −1 punkts. Pārbaudi soļu skaitu: vajadzīgi ${possibleLengths.join(" vai ")} soļi, tev ir ${submitted.length}.`, "bad");
+        } else {
+          setMessage(`Nepareizi. −1 punkts. Pirmais kļūdainais solis varētu būt ${firstWrong + 1}.`, "bad");
+        }
+        animate(submitted);
+      }
+    }
+
+    function hint(){
+      const accepted = acceptedSolutions(tasks[current]);
+      const answer = user.join("");
+      const candidates = accepted.filter(s => s.startsWith(answer));
+      if(candidates.length > 0){
+        const next = [...candidates[0]][user.length];
+        if(next){
+          const variants = candidates.length > 1 ? ` Derīgi varianti vēl ir ${candidates.length}.` : "";
+          setMessage(`Nākamā komanda: ${next}.${variants}`, "ok");
+        } else {
+          setMessage("Visi soļi ievadīti. Tagad spied “Pārbaudīt”.", "ok");
+        }
+      } else {
+        const answerChars = [...answer];
+        const closest = accepted
+          .map(s => {
+            const chars = [...s];
+            const wrongAt = answerChars.findIndex((a, i) => a !== chars[i]);
+            return {s, chars, samePrefix: wrongAt === -1 ? Math.min(answerChars.length, chars.length) : wrongAt};
+          })
+          .sort((a, b) => b.samePrefix - a.samePrefix)[0];
+        setMessage(`Pārbaudi ${closest.samePrefix + 1}. soli. Līdz tam izvēlētais variants ir pareizs.`, "bad");
+      }
+    }
+
+    async function animate(arrows){
+      drawGrid();
+      const task = tasks[current];
+      const layout = taskLayout(task);
+      const frog = document.getElementById("frog");
+      let p = {x:0, y:0};
+      for(const a of arrows){
+        await wait(250);
+        p.x += dir[a][0];
+        p.y += dir[a][1];
+        const q = posToPercent(p, layout);
+        frog.style.left = q.left + "%";
+        frog.style.top = q.top + "%";
+      }
+    }
+
+    function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+    function resetCurrentTask(){
+      user = [];
+      renderCommandBox();
+      drawGrid();
+      renderNav();
+      setMessage("Uzdevums sagatavots atkārtotai pildīšanai. Ja šim uzdevumam ir otrs virziens, par to vēl var iegūt punktu.", "");
+    }
+
+    function resetAllProgress(){
+      user = [];
+      done.clear();
+      score = 0;
+      correctCount = 0;
+      wrongCount = 0;
+      scoredSolutions.clear();
+      renderCommandBox();
+      drawGrid();
+      renderNav();
+      renderScore();
+      setMessage("Visi šīs nodarbības rezultāti un punkti notīrīti. Vari sākt no jauna.", "");
+    }
+
+    function goTo(i){
+      current = Math.max(0, Math.min(tasks.length - 1, i));
+      user = [];
+      showSolution = false;
+      render();
+    }
+
+    document.querySelectorAll("[data-arrow]").forEach(b => {
+      b.addEventListener("click", () => addArrow(b.dataset.arrow));
+    });
+    document.getElementById("undoBtn").addEventListener("click", () => { user.pop(); renderCommandBox(); });
+    document.getElementById("clearBtn").addEventListener("click", () => { user = []; renderCommandBox(); drawGrid(); setMessage("Sāc no jauna.", ""); });
+    document.getElementById("runBtn").addEventListener("click", check);
+    document.getElementById("animateBtn").addEventListener("click", () => animate(user));
+    document.getElementById("hintBtn").addEventListener("click", hint);
+    document.getElementById("repeatBtn").addEventListener("click", resetCurrentTask);
+    document.getElementById("resetProgressBtn").addEventListener("click", resetAllProgress);
+    document.getElementById("prevBtn").addEventListener("click", () => goTo(current - 1));
+    document.getElementById("nextBtn").addEventListener("click", () => goTo(current + 1));
+
+    document.addEventListener("keydown", e => {
+      const map = {ArrowUp:"↑", ArrowDown:"↓", ArrowLeft:"←", ArrowRight:"→", q:"↖", e:"↗", z:"↙", c:"↘"};
+      if(map[e.key]) addArrow(map[e.key]);
+      if(e.key === "Backspace") { user.pop(); renderCommandBox(); }
+      if(e.key === "Enter") check();
+    });
+
+    function loadFromHash(){
+      const m = location.hash.match(/uzdevums-(\d+)/);
+      if(m){
+        const idx = tasks.findIndex(t => t.id === Number(m[1]));
+        if(idx >= 0) current = idx;
+      }
+    }
+
+    loadFromHash();
+    render();
+  </script>
+</body>
+</html>
