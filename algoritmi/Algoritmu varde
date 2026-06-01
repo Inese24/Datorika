@@ -83,7 +83,7 @@
 <body>
   <header>
     <h1>Algoritmu varde</h1>
-    <p class="subtitle">Katrā lapā skolēns sastāda bultu algoritmu, lai varde izietu pēdu ceļu. Uzdevumi veidoti pēc bultu zīmēšanas principa: sākam no zilā punkta, izpildām komandas pēc kārtas.</p>
+    <p class="subtitle">Katrā lapā skolēns mācās izpildīt grafiski attēlotus algoritmus, lai varde izietu ceļu pa soļiem. Uzdevumi veidoti pēc bultu zīmēšanas principa: sākam no zaļā punkta, izpildām komandas pēc kārtas.</p>
   </header>
 
   <main>
