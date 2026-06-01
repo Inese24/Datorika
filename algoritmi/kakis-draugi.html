@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algoritms: pie kura drauga nokļūs kaķis?</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --cell: #1e293b;
+      --cell-active: #2563eb;
+      --cell-path: rgba(96, 165, 250, 0.24);
+      --grid: #475569;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #60a5fa;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 10px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(24px, 4vw, 38px);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      padding: 18px;
+    }
+
+    .task {
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .task strong {
+      color: var(--accent);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 930px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .algorithm-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .arrow-box {
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: #172554;
+      color: #dbeafe;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .arrow-box.done {
+      background: var(--good);
+      color: #052e16;
+      border-color: #86efac;
+    }
+
+    .arrow-box.current {
+      background: var(--warning);
+      color: #111827;
+      border-color: #fde68a;
+      transform: translateY(-3px);
+    }
+
+    .grid-wrap {
+      overflow-x: auto;
+      padding: 6px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 74px);
+      grid-template-rows: repeat(8, 74px);
+      width: max-content;
+      margin: 0 auto;
+      border: 3px solid var(--grid);
+      background: var(--grid);
+      gap: 2px;
+    }
+
+    .cell {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      background: var(--cell);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      user-select: none;
+    }
+
+    .cell.path::after {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      background: var(--cell-path);
+      z-index: 1;
+    }
+
+    .cell.active {
+      outline: 4px solid var(--accent);
+      outline-offset: -5px;
+    }
+
+    .emoji {
+      position: relative;
+      z-index: 3;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.35));
+    }
+
+    .friend-label {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      bottom: 3px;
+      z-index: 4;
+      font-size: 11px;
+      font-weight: bold;
+      color: #f8fafc;
+      text-align: center;
+      text-shadow: 0 1px 3px #000;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .controls h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      background: #475569;
+    }
+
+    .good {
+      background: var(--good);
+      color: #052e16;
+    }
+
+    .bad {
+      background: var(--bad);
+    }
+
+    .message {
+      min-height: 72px;
+      border-radius: 16px;
+      background: #172554;
+      color: #dbeafe;
+      padding: 14px;
+      font-size: 17px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .stats {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 15px;
+    }
+
+    .answer-card {
+      border-radius: 16px;
+      background: #052e16;
+      color: #dcfce7;
+      padding: 14px;
+      display: none;
+      line-height: 1.4;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Algoritms: pie kura drauga nokļūs kaķis?</h1>
+    <p>Izpildi bultiņu algoritmu un noskaidro, vai dzeltenais kaķis nokļūs pie suņa, siāmas kaķa vai peles.</p>
+  </header>
+
+  <main>
+    <section class="panel task">
+      <strong>Uzdevums.</strong> Sāc no rūtiņas, kurā atrodas dzeltenais kaķis. Apskati nākamo bultiņu un klikšķini uz tās rūtiņas, uz kuru kaķim jāpārvietojas. Tā skolēns pats izpilda algoritmu soli pa solim.
+      <div id="algorithmStrip" class="algorithm-strip" aria-label="Algoritma bultiņas"></div>
+    </section>
+
+    <section class="layout">
+      <div class="panel grid-wrap">
+        <div id="grid" class="grid" aria-label="Rūtiņu laukums ar kaķa ceļu"></div>
+      </div>
+
+      <aside class="panel controls">
+        <h2>Pārbaude</h2>
+
+        <div class="button-grid">
+          <button onclick="showHint()">Parādīt norādi</button>
+          <button class="good" onclick="runAll()">Izpildīt visu</button>
+          <button class="secondary" onclick="undoStep()">Soli atpakaļ</button>
+          <button class="bad" onclick="resetTask()">Sākt no jauna</button>
+        </div>
+
+        <div id="message" class="message">Sāc algoritma izpildi. Pirmā komanda ir “uz augšu”. Klikšķini uz rūtiņas virs kaķa.</div>
+
+        <div id="answer" class="answer-card">Atbilde: kaķis nokļuva pie suņa.</div>
+
+        <div class="stats">
+          <div><strong>Sākums:</strong> dzeltenais kaķis</div>
+          <div><strong>Draugi:</strong> suns, siāmas kaķis, pele</div>
+          <div><strong>Soļu skaits:</strong> <span id="stepCounter">0</span> / <span id="totalSteps">0</span></div>
+          <div><strong>Mērķis skolēnam:</strong> trenēt virzienus, secību, algoritma pārbaudi un precīzu nākamā lauciņa izvēli.</div>
+        </div>
+      </aside>
+    </section>
+
+    <p class="footer-note">Materiāla ideja veidota pēc Start(IT) datorikas uzdevuma.</p>
+  </main>
+
+  <script>
+    const rows = 8;
+    const cols = 8;
+
+    const start = { row: 1, col: 1 };
+
+    const friends = [
+      { row: 7, col: 3, emoji: "🐶", label: "Suns" },
+      { row: 5, col: 7, emoji: "🐈", label: "Siāmas kaķis" },
+      { row: 6, col: 5, emoji: "🐭", label: "Pele" }
+    ];
+
+    const steps = [
+      "up", "left", "down", "down", "right", "right", "right", "down",
+      "right", "down", "down", "left", "left", "down", "down", "right"
+    ];
+
+    const symbols = {
+      up: "↑",
+      left: "←",
+      down: "↓",
+      right: "→"
+    };
+
+    let cat = { ...start };
+    let currentStep = 0;
+    let path = [{ ...start }];
+    let isRunning = false;
+
+    const gridEl = document.getElementById("grid");
+    const algorithmStripEl = document.getElementById("algorithmStrip");
+    const messageEl = document.getElementById("message");
+    const answerEl = document.getElementById("answer");
+    const stepCounterEl = document.getElementById("stepCounter");
+    const totalStepsEl = document.getElementById("totalSteps");
+
+    totalStepsEl.textContent = steps.length;
+
+    function sameCell(a, b) {
+      return a.row === b.row && a.col === b.col;
+    }
+
+    function getFriend(row, col) {
+      return friends.find(friend => friend.row === row && friend.col === col);
+    }
+
+    function isInPath(row, col) {
+      return path.some(cell => cell.row === row && cell.col === col);
+    }
+
+    function drawAlgorithm() {
+      algorithmStripEl.innerHTML = "";
+
+      steps.forEach((step, index) => {
+        const box = document.createElement("div");
+        box.className = "arrow-box";
+        box.textContent = symbols[step];
+
+        if (index < currentStep) box.classList.add("done");
+        if (index === currentStep) box.classList.add("current");
+
+        algorithmStripEl.appendChild(box);
+      });
+    }
+
+    function drawGrid() {
+      gridEl.innerHTML = "";
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+
+          if (isInPath(r, c)) cell.classList.add("path");
+          if (sameCell(cat, { row: r, col: c })) cell.classList.add("active");
+
+          const friend = getFriend(r, c);
+          if (friend) {
+            const emoji = document.createElement("div");
+            emoji.className = "emoji";
+            emoji.textContent = friend.emoji;
+            cell.appendChild(emoji);
+
+            const label = document.createElement("div");
+            label.className = "friend-label";
+            label.textContent = friend.label;
+            cell.appendChild(label);
+          }
+
+          if (sameCell(cat, { row: r, col: c })) {
+            const catEmoji = document.createElement("div");
+            catEmoji.className = "emoji";
+            catEmoji.textContent = "🐱";
+            cell.appendChild(catEmoji);
+          }
+
+          cell.addEventListener("click", () => handleCellClick(r, c));
+          gridEl.appendChild(cell);
+        }
+      }
+
+      stepCounterEl.textContent = currentStep;
+    }
+
+    function move(position, direction) {
+      const next = { ...position };
+      if (direction === "up") next.row--;
+      if (direction === "left") next.col--;
+      if (direction === "down") next.row++;
+      if (direction === "right") next.col++;
+      return next;
+    }
+
+    function outside(position) {
+      return position.row < 0 || position.row >= rows || position.col < 0 || position.col >= cols;
+    }
+
+    function showFinalMessage() {
+      const friend = getFriend(cat.row, cat.col);
+
+      if (friend) {
+        messageEl.textContent = `Algoritms izpildīts. Kaķis nokļuva pie drauga: ${friend.label}.`;
+        answerEl.textContent = `Atbilde: kaķis nokļuva pie drauga “${friend.label}”.`;
+        answerEl.style.display = "block";
+      } else {
+        messageEl.textContent = "Algoritms izpildīts, bet kaķis nenonāca pie neviena drauga.";
+        answerEl.style.display = "none";
+      }
+    }
+
+    function makeMoveTo(row, col) {
+      if (currentStep >= steps.length) {
+        showFinalMessage();
+        return;
+      }
+
+      const direction = steps[currentStep];
+      const expected = move(cat, direction);
+
+      if (outside(expected)) {
+        messageEl.textContent = `Kļūda ${currentStep + 1}. solī: kaķis iziet ārpus laukuma.`;
+        return;
+      }
+
+      if (row !== expected.row || col !== expected.col) {
+        messageEl.textContent = `Mēģini vēlreiz. Nākamā bultiņa ir ${symbols[direction]}. Izvēlies blakus rūtiņu pareizajā virzienā.`;
+        return;
+      }
+
+      cat = expected;
+      path.push({ ...cat });
+      currentStep++;
+      answerEl.style.display = "none";
+
+      if (currentStep < steps.length) {
+        messageEl.textContent = `${currentStep}. solis izpildīts. Nākamā komanda: ${symbols[steps[currentStep]]}. Klikšķini uz pareizās blakus rūtiņas.`;
+      } else {
+        showFinalMessage();
+      }
+
+      drawAlgorithm();
+      drawGrid();
+    }
+
+    function handleCellClick(row, col) {
+      if (isRunning) return;
+      makeMoveTo(row, col);
+    }
+
+    function showHint() {
+      if (currentStep >= steps.length) {
+        showFinalMessage();
+        return;
+      }
+
+      const direction = steps[currentStep];
+      const expected = move(cat, direction);
+      messageEl.textContent = `Nākamā bultiņa ir ${symbols[direction]}. Klikšķini uz rūtiņas: ${directionName(direction)}.`;
+    }
+
+    function directionName(direction) {
+      if (direction === "up") return "virs kaķa";
+      if (direction === "left") return "pa kreisi no kaķa";
+      if (direction === "down") return "zem kaķa";
+      if (direction === "right") return "pa labi no kaķa";
+      return "blakus kaķim";
+    }
+
+    function undoStep() {
+      if (isRunning || currentStep === 0) return;
+
+      currentStep--;
+      path.pop();
+      cat = { ...path[path.length - 1] };
+      answerEl.style.display = "none";
+      messageEl.textContent = "Viens solis atcelts. Vari turpināt pārbaudi.";
+      drawAlgorithm();
+      drawGrid();
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function runAll() {
+      if (isRunning) return;
+      isRunning = true;
+
+      while (currentStep < steps.length) {
+        const direction = steps[currentStep];
+        const next = move(cat, direction);
+
+        if (outside(next)) {
+          messageEl.textContent = `Kļūda ${currentStep + 1}. solī: kaķis iziet ārpus laukuma.`;
+          isRunning = false;
+          return;
+        }
+
+        cat = next;
+        path.push({ ...cat });
+        currentStep++;
+        answerEl.style.display = "none";
+        drawAlgorithm();
+        drawGrid();
+
+        if (currentStep < steps.length) {
+          messageEl.textContent = `${currentStep}. solis izpildīts. Nākamā komanda: ${symbols[steps[currentStep]]}.`;
+        } else {
+          showFinalMessage();
+        }
+
+        await sleep(450);
+      }
+
+      isRunning = false;
+    }
+
+    function resetTask() {
+      isRunning = false;
+
+      cat = { ...start };
+      currentStep = 0;
+      path = [{ ...start }];
+      answerEl.style.display = "none";
+      messageEl.textContent = "Sāc algoritma izpildi. Pirmā komanda ir “uz augšu”. Klikšķini uz rūtiņas virs kaķa.";
+      drawAlgorithm();
+      drawGrid();
+    }
+
+    drawAlgorithm();
+    drawGrid();
+  </script>
+</body>
+</html>
