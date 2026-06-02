@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zīmē pa rūtiņām</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --grid: #c7c7c7;
+      --grid-dark: #334155;
+      --accent: #4f46e5;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --line: #38bdf8;
+      --point: #4f46e5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 10px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 4vw, 40px);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .task-card {
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .task-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .task-title {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .arrows {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .arrow-box {
+      width: 44px;
+      height: 44px;
+      border: 3px solid #7a7a7a;
+      background: #f8fafc;
+      color: #111827;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .arrow-box.done {
+      background: #dcfce7;
+      border-color: var(--good);
+      color: #052e16;
+    }
+
+    .arrow-box.current {
+      background: #fef3c7;
+      border-color: var(--warn);
+      color: #111827;
+      transform: translateY(-3px);
+    }
+
+    .work {
+      display: grid;
+      grid-template-columns: 1fr 260px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 760px) {
+      .work {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .grid-wrap {
+      overflow-x: auto;
+      padding: 6px 0;
+    }
+
+    svg {
+      display: block;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 8px;
+      max-width: 100%;
+      height: auto;
+      touch-action: manipulation;
+    }
+
+    .grid-line {
+      stroke: var(--grid);
+      stroke-width: 3;
+    }
+
+    .drawn-line {
+      stroke: var(--line);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .start-point {
+      fill: var(--point);
+      stroke: #312e81;
+      stroke-width: 2;
+    }
+
+    .current-point {
+      fill: var(--warn);
+      stroke: #78350f;
+      stroke-width: 2;
+    }
+
+    .click-point {
+      fill: transparent;
+      cursor: pointer;
+    }
+
+    .click-point:hover {
+      fill: rgba(79, 70, 229, 0.18);
+    }
+
+    .possible-point {
+      fill: rgba(34, 197, 94, 0.32);
+      stroke: var(--good);
+      stroke-width: 2;
+    }
+
+    .side {
+      display: grid;
+      gap: 10px;
+    }
+
+    .message {
+      min-height: 72px;
+      border-radius: 14px;
+      background: #172554;
+      color: #dbeafe;
+      padding: 12px;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+    }
+
+    .secondary {
+      background: #475569;
+    }
+
+    .bad {
+      background: var(--bad);
+    }
+
+    .good {
+      background: var(--good);
+      color: #052e16;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.35;
+      padding-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Zīmē pa rūtiņām</h1>
+    <p>Sāc no zilā punkta un seko virzienu bultām. Klikšķini uz nākamā režģa punkta, lai uzzīmētu ceļu.</p>
+  </header>
+
+  <main id="tasks"></main>
+
+  <p class="footer-note">
+      Materiāla ideja veidota pēc Start(IT) datorikas uzdevuma. <br><br>
+	  &copy 2026 Inese Germane
+  </p>
+
+  <script>
+    const tasks = [
+      {
+        title: "1. uzdevums",
+        start: { x: 1, y: 4 },
+        arrows: ["right", "right", "right", "up", "up"]
+      },
+      {
+        title: "2. uzdevums",
+        start: { x: 2, y: 2 },
+        arrows: ["right", "down", "right", "down", "right"]
+      },
+      {
+        title: "3. uzdevums",
+        start: { x: 1, y: 5 },
+        arrows: ["up", "up", "right", "down", "down"]
+      },
+      {
+        title: "4. uzdevums",
+        start: { x: 4, y: 4 },
+        arrows: ["up", "left", "down", "down", "left", "left", "up", "up", "up", "right"]
+      },
+      {
+        title: "5. uzdevums",
+        start: { x: 3, y: 3 },
+        arrows: ["down", "left", "up", "up", "right", "right", "down", "down", "down", "left"]
+      },
+      {
+        title: "6. uzdevums",
+        start: { x: 3, y: 1 },
+        arrows: ["downRight", "downRight", "downLeft", "downLeft", "upLeft", "upLeft", "upRight", "upRight", "down", "down"]
+      }
+    ];
+
+    const arrowSymbols = {
+      up: "↑",
+      down: "↓",
+      left: "←",
+      right: "→",
+      upLeft: "↖",
+      upRight: "↗",
+      downLeft: "↙",
+      downRight: "↘"
+    };
+
+    const directionNames = {
+      up: "uz augšu",
+      down: "uz leju",
+      left: "pa kreisi",
+      right: "pa labi",
+      upLeft: "slīpi uz augšu pa kreisi",
+      upRight: "slīpi uz augšu pa labi",
+      downLeft: "slīpi uz leju pa kreisi",
+      downRight: "slīpi uz leju pa labi"
+    };
+
+    const deltas = {
+      up: { x: 0, y: -1 },
+      down: { x: 0, y: 1 },
+      left: { x: -1, y: 0 },
+      right: { x: 1, y: 0 },
+      upLeft: { x: -1, y: -1 },
+      upRight: { x: 1, y: -1 },
+      downLeft: { x: -1, y: 1 },
+      downRight: { x: 1, y: 1 }
+    };
+
+    const state = tasks.map(task => ({
+      current: { ...task.start },
+      path: [{ ...task.start }],
+      step: 0,
+      showHint: false
+    }));
+
+    const gridSize = 6;
+    const cell = 44;
+    const margin = 24;
+    const svgSize = margin * 2 + gridSize * cell;
+
+    const tasksEl = document.getElementById("tasks");
+
+    function makeSvgElement(name) {
+      return document.createElementNS("http://www.w3.org/2000/svg", name);
+    }
+
+    function pointToSvg(point) {
+      return {
+        x: margin + point.x * cell,
+        y: margin + point.y * cell
+      };
+    }
+
+    function nextPoint(task, taskState) {
+      if (taskState.step >= task.arrows.length) return null;
+      const direction = task.arrows[taskState.step];
+      const delta = deltas[direction];
+      return {
+        x: taskState.current.x + delta.x,
+        y: taskState.current.y + delta.y
+      };
+    }
+
+    function samePoint(a, b) {
+      return a && b && a.x === b.x && a.y === b.y;
+    }
+
+    function isInsideGrid(point) {
+      return point.x >= 0 && point.x <= gridSize && point.y >= 0 && point.y <= gridSize;
+    }
+
+    function renderAll() {
+      tasksEl.innerHTML = "";
+      tasks.forEach((task, index) => renderTask(task, index));
+    }
+
+    function renderTask(task, index) {
+      const taskState = state[index];
+
+      const card = document.createElement("section");
+      card.className = "task-card";
+
+      const top = document.createElement("div");
+      top.className = "task-top";
+
+      const title = document.createElement("h2");
+      title.className = "task-title";
+      title.textContent = task.title;
+
+      const arrows = document.createElement("div");
+      arrows.className = "arrows";
+
+      task.arrows.forEach((direction, arrowIndex) => {
+        const box = document.createElement("div");
+        box.className = "arrow-box";
+        if (arrowIndex < taskState.step) box.classList.add("done");
+        if (arrowIndex === taskState.step) box.classList.add("current");
+        box.textContent = arrowSymbols[direction];
+        arrows.appendChild(box);
+      });
+
+      top.appendChild(title);
+      top.appendChild(arrows);
+
+      const work = document.createElement("div");
+      work.className = "work";
+
+      const gridWrap = document.createElement("div");
+      gridWrap.className = "grid-wrap";
+      gridWrap.appendChild(createGrid(task, index));
+
+      const side = document.createElement("aside");
+      side.className = "side";
+
+      const msg = document.createElement("div");
+      msg.className = "message";
+      msg.id = `message-${index}`;
+
+      if (taskState.step >= task.arrows.length) {
+        msg.textContent = "Pareizi! Ceļš ir pabeigts.";
+      } else {
+        const direction = task.arrows[taskState.step];
+        msg.textContent = `Nākamā bulta: ${arrowSymbols[direction]} — ${directionNames[direction]}. Klikšķini uz pareizā nākamā punkta.`;
+      }
+
+      const buttons = document.createElement("div");
+      buttons.className = "buttons";
+
+      const hintButton = document.createElement("button");
+      hintButton.textContent = "Parādīt punktu";
+      hintButton.onclick = () => {
+        taskState.showHint = !taskState.showHint;
+        renderAll();
+      };
+
+      const undoButton = document.createElement("button");
+      undoButton.className = "secondary";
+      undoButton.textContent = "Soli atpakaļ";
+      undoButton.onclick = () => undo(index);
+
+      const resetButton = document.createElement("button");
+      resetButton.className = "bad";
+      resetButton.textContent = "Sākt no jauna";
+      resetButton.onclick = () => reset(index);
+
+      const checkButton = document.createElement("button");
+      checkButton.className = "good";
+      checkButton.textContent = "Pārbaudīt";
+      checkButton.onclick = () => check(index);
+
+      buttons.appendChild(hintButton);
+      buttons.appendChild(undoButton);
+      buttons.appendChild(resetButton);
+      buttons.appendChild(checkButton);
+
+      const info = document.createElement("div");
+      info.className = "small";
+      info.innerHTML = `<strong>Izpildīti soļi:</strong> ${taskState.step} / ${task.arrows.length}<br>
+                        <strong>Noteikums:</strong> jāklikšķina uz nākamā režģa punkta atbilstoši bultai.`;
+
+      side.appendChild(msg);
+      side.appendChild(buttons);
+      side.appendChild(info);
+
+      work.appendChild(gridWrap);
+      work.appendChild(side);
+
+      card.appendChild(top);
+      card.appendChild(work);
+      tasksEl.appendChild(card);
+    }
+
+    function createGrid(task, index) {
+      const taskState = state[index];
+      const svg = makeSvgElement("svg");
+      svg.setAttribute("viewBox", `0 0 ${svgSize} ${svgSize}`);
+      svg.setAttribute("width", svgSize);
+      svg.setAttribute("height", svgSize);
+      svg.setAttribute("aria-label", `${task.title} režģis`);
+
+      for (let i = 0; i <= gridSize; i++) {
+        const x = margin + i * cell;
+        const vertical = makeSvgElement("line");
+        vertical.setAttribute("x1", x);
+        vertical.setAttribute("y1", margin);
+        vertical.setAttribute("x2", x);
+        vertical.setAttribute("y2", margin + gridSize * cell);
+        vertical.setAttribute("class", "grid-line");
+        svg.appendChild(vertical);
+
+        const y = margin + i * cell;
+        const horizontal = makeSvgElement("line");
+        horizontal.setAttribute("x1", margin);
+        horizontal.setAttribute("y1", y);
+        horizontal.setAttribute("x2", margin + gridSize * cell);
+        horizontal.setAttribute("y2", y);
+        horizontal.setAttribute("class", "grid-line");
+        svg.appendChild(horizontal);
+      }
+
+      if (taskState.path.length > 1) {
+        const polyline = makeSvgElement("polyline");
+        const points = taskState.path
+          .map(point => pointToSvg(point))
+          .map(point => `${point.x},${point.y}`)
+          .join(" ");
+        polyline.setAttribute("points", points);
+        polyline.setAttribute("class", "drawn-line");
+        svg.appendChild(polyline);
+      }
+
+      const startSvg = pointToSvg(task.start);
+      const start = makeSvgElement("circle");
+      start.setAttribute("cx", startSvg.x);
+      start.setAttribute("cy", startSvg.y);
+      start.setAttribute("r", 7);
+      start.setAttribute("class", "start-point");
+      svg.appendChild(start);
+
+      const currentSvg = pointToSvg(taskState.current);
+      const current = makeSvgElement("circle");
+      current.setAttribute("cx", currentSvg.x);
+      current.setAttribute("cy", currentSvg.y);
+      current.setAttribute("r", 7);
+      current.setAttribute("class", "current-point");
+      svg.appendChild(current);
+
+      const expected = nextPoint(task, taskState);
+
+      if (taskState.showHint && expected && isInsideGrid(expected)) {
+        const expectedSvg = pointToSvg(expected);
+        const possible = makeSvgElement("circle");
+        possible.setAttribute("cx", expectedSvg.x);
+        possible.setAttribute("cy", expectedSvg.y);
+        possible.setAttribute("r", 12);
+        possible.setAttribute("class", "possible-point");
+        svg.appendChild(possible);
+      }
+
+      for (let y = 0; y <= gridSize; y++) {
+        for (let x = 0; x <= gridSize; x++) {
+          const point = pointToSvg({ x, y });
+          const click = makeSvgElement("circle");
+          click.setAttribute("cx", point.x);
+          click.setAttribute("cy", point.y);
+          click.setAttribute("r", 15);
+          click.setAttribute("class", "click-point");
+          click.addEventListener("click", () => handlePointClick(index, { x, y }));
+          svg.appendChild(click);
+        }
+      }
+
+      return svg;
+    }
+
+    function handlePointClick(index, clickedPoint) {
+      const task = tasks[index];
+      const taskState = state[index];
+
+      if (taskState.step >= task.arrows.length) {
+        showMessage(index, "Šis uzdevums jau ir pabeigts. Vari sākt no jauna.");
+        return;
+      }
+
+      const expected = nextPoint(task, taskState);
+
+      if (!isInsideGrid(expected)) {
+        showMessage(index, "Kļūda uzdevumā: nākamais punkts iziet ārpus režģa.");
+        return;
+      }
+
+      if (!samePoint(clickedPoint, expected)) {
+        const direction = task.arrows[taskState.step];
+        showMessage(index, `Mēģini vēlreiz. Šobrīd jāiet ${arrowSymbols[direction]} — ${directionNames[direction]}.`);
+        return;
+      }
+
+      taskState.current = { ...clickedPoint };
+      taskState.path.push({ ...clickedPoint });
+      taskState.step++;
+      taskState.showHint = false;
+      renderAll();
+    }
+
+    function undo(index) {
+      const taskState = state[index];
+
+      if (taskState.step === 0) {
+        showMessage(index, "Vēl nav neviena soļa, ko dzēst.");
+        return;
+      }
+
+      taskState.path.pop();
+      taskState.current = { ...taskState.path[taskState.path.length - 1] };
+      taskState.step--;
+      taskState.showHint = false;
+      renderAll();
+    }
+
+    function reset(index) {
+      const task = tasks[index];
+      state[index] = {
+        current: { ...task.start },
+        path: [{ ...task.start }],
+        step: 0,
+        showHint: false
+      };
+      renderAll();
+    }
+
+    function check(index) {
+      const task = tasks[index];
+      const taskState = state[index];
+
+      if (taskState.step >= task.arrows.length) {
+        showMessage(index, "Pareizi! Visi soļi ir izpildīti.");
+      } else {
+        const direction = task.arrows[taskState.step];
+        showMessage(index, `Vēl nav pabeigts. Nākamā bulta ir ${arrowSymbols[direction]} — ${directionNames[direction]}.`);
+      }
+    }
+
+    function showMessage(index, text) {
+      const msg = document.getElementById(`message-${index}`);
+      if (msg) msg.textContent = text;
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
+
