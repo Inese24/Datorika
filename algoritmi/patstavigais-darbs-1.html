@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patstāvīgais darbs: algoritmi</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --panel: #172554;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --grid: #94a3b8;
+      --cell: #f8fafc;
+      --cell-text: #111827;
+      --accent: #60a5fa;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --line: #38bdf8;
+      --point: #2563eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px 10px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 4vw, 40px);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .student-row {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    @media (max-width: 760px) {
+      .student-row { grid-template-columns: 1fr; }
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 2px solid #475569;
+      background: #0f172a;
+      color: var(--text);
+      font-size: 17px;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 820px) {
+      .scoreboard { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      .scoreboard { grid-template-columns: 1fr; }
+    }
+
+    .score-card {
+      background: #0f172a;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .score-number {
+      display: block;
+      font-size: 30px;
+      font-weight: bold;
+      color: #86efac;
+      margin-bottom: 4px;
+    }
+
+    .score-label {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+
+    .task-text {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .snowman-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 780px) {
+      .snowman-grid { grid-template-columns: 1fr; }
+    }
+
+    .snow-card {
+      background: #f8fafc;
+      color: #111827;
+      border: 3px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 12px;
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+    }
+
+    .snow-picture {
+      width: 112px;
+      height: 112px;
+      border: 2px solid #94a3b8;
+      border-radius: 12px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .snowman-svg {
+      width: 98px;
+      height: 98px;
+    }
+
+    .snow-select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #94a3b8;
+      font-size: 16px;
+      font-weight: bold;
+      background: white;
+      color: #111827;
+    }
+
+    .snow-result {
+      min-height: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .correct-text { color: #15803d; }
+    .wrong-text { color: #b91c1c; }
+
+    .task2-layout {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 920px) {
+      .task2-layout { grid-template-columns: 1fr; }
+    }
+
+    .grid-wrap {
+      overflow-x: auto;
+    }
+
+    .map {
+      display: grid;
+      grid-template-columns: repeat(5, 68px);
+      grid-template-rows: repeat(4, 68px);
+      width: max-content;
+      border: 3px solid var(--grid);
+      background: var(--grid);
+      gap: 2px;
+      margin: 0 auto;
+    }
+
+    .map-cell {
+      width: 68px;
+      height: 68px;
+      background: var(--cell);
+      color: var(--cell-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: 34px;
+      font-weight: bold;
+    }
+
+    .path-dot {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .path-dot.lenijs-path {
+      background: rgba(37, 99, 235, 0.78);
+      border: 3px solid #1d4ed8;
+      top: 7px;
+      left: 7px;
+    }
+
+    .path-dot.zipijs-path {
+      background: rgba(236, 72, 153, 0.78);
+      border: 3px solid #be185d;
+      right: 7px;
+      bottom: 7px;
+    }
+
+    .character {
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+    }
+
+    .cute-computer {
+      width: 44px;
+      height: 40px;
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.22));
+      z-index: 2;
+    }
+
+    .cute-computer.small {
+      width: 34px;
+      height: 31px;
+    }
+
+    .cute-screen {
+      width: 38px;
+      height: 25px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%);
+      border: 2px solid #1d4ed8;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cute-computer.small .cute-screen {
+      width: 30px;
+      height: 20px;
+      border-radius: 7px;
+    }
+
+    .cute-face {
+      position: absolute;
+      width: 20px;
+      height: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      top: 7px;
+    }
+
+    .cute-computer.small .cute-face {
+      width: 16px;
+      height: 8px;
+      top: 5px;
+    }
+
+    .cute-eye {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #111827;
+    }
+
+    .cute-computer.small .cute-eye {
+      width: 3px;
+      height: 3px;
+    }
+
+    .cute-mouth {
+      position: absolute;
+      width: 10px;
+      height: 5px;
+      border-bottom: 2px solid #111827;
+      border-radius: 0 0 10px 10px;
+      left: 50%;
+      top: 6px;
+      transform: translateX(-50%);
+    }
+
+    .cute-computer.small .cute-mouth {
+      width: 8px;
+      height: 4px;
+      top: 5px;
+    }
+
+    .cute-stand {
+      position: absolute;
+      bottom: 7px;
+      width: 7px;
+      height: 6px;
+      background: #cbd5e1;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .cute-computer.small .cute-stand {
+      bottom: 5px;
+      width: 6px;
+      height: 5px;
+    }
+
+    .cute-base {
+      position: absolute;
+      bottom: 3px;
+      width: 18px;
+      height: 4px;
+      background: #94a3b8;
+      border-radius: 3px;
+    }
+
+    .cute-computer.small .cute-base {
+      bottom: 2px;
+      width: 14px;
+      height: 3px;
+    }
+
+    .route-title-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .small-label {
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      font-size: 9px;
+      color: #111827;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .route-card {
+      display: grid;
+      gap: 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .route-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .arrow-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .arrow-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 2px solid #94a3b8;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .answer-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .choice {
+      border: 2px solid #475569;
+      background: #1e293b;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .choice.selected {
+      border-color: var(--warn);
+      background: #451a03;
+      color: #ffedd5;
+    }
+
+    .choice.correct {
+      border-color: var(--good);
+      background: #052e16;
+      color: #dcfce7;
+    }
+
+    .choice.wrong {
+      border-color: var(--bad);
+      background: #450a0a;
+      color: #fee2e2;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 620px) {
+      .buttons { grid-template-columns: 1fr; }
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+    }
+
+    button:hover { filter: brightness(1.08); }
+    .good-btn { background: var(--good); color: #052e16; }
+    .bad-btn { background: var(--bad); }
+    .secondary { background: #475569; }
+
+    .message,
+    .feedback,
+    .points-box {
+      min-height: 58px;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 17px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .message {
+      background: var(--panel);
+      color: #dbeafe;
+    }
+
+    .feedback {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+    }
+
+    .feedback.excellent,
+    .points-box.done {
+      background: #052e16;
+      border: 1px solid var(--good);
+      color: #dcfce7;
+    }
+
+    .feedback.try-again {
+      background: #451a03;
+      border: 1px solid var(--warn);
+      color: #ffedd5;
+    }
+
+    .points-box {
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+    }
+
+    .final-grade {
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 18px;
+      padding: 16px;
+      display: grid;
+      gap: 8px;
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    .submit-status {
+      min-height: 48px;
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .final-grade strong {
+      color: #86efac;
+      font-size: 20px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.35;
+      padding-bottom: 20px;
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .panel, .score-card, .final-grade {
+        box-shadow: none;
+        border-color: #999;
+      }
+
+      button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Patstāvīgais darbs: algoritmi</h1>
+    <p>1. variants. Izpildi abus uzdevumus un saņem vērtējumu par paveikto darbu.</p>
+  </header>
+
+  <main>
+    <section class="panel student-row">
+      <label>
+        Tavs vārds
+        <input id="studentName" type="text" placeholder="Ieraksti savu vārdu" oninput="updateScore()" />
+      </label>
+
+      <div class="scoreboard">
+        <div class="score-card">
+          <span id="scoreTotal" class="score-number">0 / 10</span>
+          <span class="score-label">kopējie punkti</span>
+        </div>
+        <div class="score-card">
+          <span id="scoreGrade" class="score-number">—</span>
+          <span class="score-label">vērtējums 10 ballēs</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>1. uzdevums — uzcel sniegavīru</h2>
+      <div class="task-text">
+        Savieno ciparus ar attēlu kartiņām tādā kārtībā, kādā ceļ sniegavīru. Katram attēlam izvēlies pareizo kārtas numuru.
+      </div>
+      <div id="snowmanTask" class="snowman-grid"></div>
+      <div id="task1Points" class="points-box">1. uzdevums: vēl nav pārbaudīts. Maksimums: 5 punkti.</div>
+    </section>
+
+    <section class="panel">
+      <h2>2. uzdevums — vai Lenijs un Zipijs nokļūs pie svētku eglītes?</h2>
+      <div class="task-text">
+        Apskati doto laukumu un bultiņu algoritmus. Nosaki, vai katrs tēls nokļūs pie svētku eglītes.
+        Kad ieslēgta poga “Parādīt ceļus”, <strong style="color:#60a5fa;">Lenija ceļš ir zilā krāsā</strong>, bet <strong style="color:#f472b6;">Zipija ceļš ir rozā krāsā</strong>.
+      </div>
+
+      <div class="task2-layout">
+        <div class="grid-wrap">
+          <div id="map" class="map" aria-label="Laukums ar Leniju, Zipiju un svētku eglīti"></div>
+        </div>
+
+        <div>
+          <div id="routes"></div>
+          <div id="task2Points" class="points-box">2. uzdevums: vēl nav pārbaudīts. Maksimums: 5 punkti.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="buttons">
+        <button class="good-btn" onclick="checkWork()">Pārbaudīt darbu</button>
+        <button class="secondary" onclick="showPaths()">Parādīt ceļus</button>
+        <button class="bad-btn" onclick="resetWork()">Sākt no jauna</button>
+        <button class="secondary" onclick="copyResult()">Kopēt rezultātu</button>
+        <button class="secondary" onclick="downloadResult()">Lejupielādēt rezultātu</button>
+      </div>
+      <div id="message" class="message">Kad abi uzdevumi izpildīti, spied “Pārbaudīt darbu”.</div>
+      <div id="feedback" class="feedback">Darbs vēl nav pārbaudīts.</div>
+      <div id="finalGrade" class="final-grade">
+        <strong>Vērtējums vēl nav piešķirts.</strong>
+        Aizpildi uzdevumus un pārbaudi darbu.
+      </div>
+      <div id="submitStatus" class="submit-status">
+        Pēc pārbaudes vari kopēt rezultātu vai lejupielādēt to kā .txt failu un nosūtīt skolotājai.
+      </div>
+    </section>
+  </main>
+
+  <p class="footer-note">
+      Materiāla ideja veidota pēc Start(IT) datorikas uzdevuma. <br>
+	  &copy 2026 Inese Germane 
+  </p>
+
+  <script>
+    const snowCards = [
+      { id: "two", title: "Divas sniega bumbas", correct: 2, type: "two" },
+      { id: "decorated", title: "Sniegavīrs ar seju un rokām", correct: 4, type: "decorated" },
+      { id: "one", title: "Pirmā sniega bumba", correct: 1, type: "one" },
+      { id: "hat", title: "Gatavs sniegavīrs ar cepuri", correct: 5, type: "hat" },
+      { id: "three", title: "Trīs sniega bumbas", correct: 3, type: "three" }
+    ];
+
+    const routeTasks = [
+      {
+        id: "lenijs",
+        name: "Lenijs",
+        emoji: "🤖",
+        start: { r: 3, c: 1 },
+        arrows: ["right", "up", "right", "right", "down"],
+        correct: "no"
+      },
+      {
+        id: "zipijs",
+        name: "Zipijs",
+        emoji: "💻",
+        start: { r: 1, c: 1 },
+        arrows: ["right", "up", "right", "down", "right"],
+        correct: "yes"
+      }
+    ];
+
+    const tree = { r: 1, c: 4 };
+    const rows = 4;
+    const cols = 5;
+
+    const arrowSymbols = {
+      up: "↑",
+      down: "↓",
+      left: "←",
+      right: "→"
+    };
+
+    const deltas = {
+      up: { r: -1, c: 0 },
+      down: { r: 1, c: 0 },
+      left: { r: 0, c: -1 },
+      right: { r: 0, c: 1 }
+    };
+
+    let checked = false;
+    let pathsVisible = false;
+    const snowAnswers = {};
+    const routeAnswers = {};
+
+    const snowmanTaskEl = document.getElementById("snowmanTask");
+    const routesEl = document.getElementById("routes");
+    const mapEl = document.getElementById("map");
+    const task1PointsEl = document.getElementById("task1Points");
+    const task2PointsEl = document.getElementById("task2Points");
+    const scoreTotalEl = document.getElementById("scoreTotal");
+    const scoreGradeEl = document.getElementById("scoreGrade");
+    const messageEl = document.getElementById("message");
+    const feedbackEl = document.getElementById("feedback");
+    const finalGradeEl = document.getElementById("finalGrade");
+    const submitStatusEl = document.getElementById("submitStatus");
+
+    function createCuteComputer(size = "") {
+      const mascot = document.createElement("div");
+      mascot.className = size ? `cute-computer ${size}` : "cute-computer";
+
+      const screen = document.createElement("div");
+      screen.className = "cute-screen";
+
+      const face = document.createElement("div");
+      face.className = "cute-face";
+
+      const leftEye = document.createElement("div");
+      leftEye.className = "cute-eye";
+
+      const rightEye = document.createElement("div");
+      rightEye.className = "cute-eye";
+
+      const mouth = document.createElement("div");
+      mouth.className = "cute-mouth";
+
+      const stand = document.createElement("div");
+      stand.className = "cute-stand";
+
+      const base = document.createElement("div");
+      base.className = "cute-base";
+
+      face.appendChild(leftEye);
+      face.appendChild(rightEye);
+      screen.appendChild(face);
+      screen.appendChild(mouth);
+      mascot.appendChild(screen);
+      mascot.appendChild(stand);
+      mascot.appendChild(base);
+
+      return mascot;
+    }
+
+    function getStudentName() {
+      const name = document.getElementById("studentName").value.trim();
+      return name || "Nav norādīts";
+    }
+
+    function buildResultText() {
+      const total = checked ? getTotalPoints() : 0;
+      const grade = checked ? getGrade(total) : "nav piešķirts";
+      const task1 = checked ? getTask1Points() : 0;
+      const task2 = checked ? getTask2Points() : 0;
+      const lenijsAnswer = routeAnswers.lenijs === "yes" ? "Jā, nokļūs" : routeAnswers.lenijs === "no" ? "Nē, nenokļūs" : "Nav atbildes";
+      const zipijsAnswer = routeAnswers.zipijs === "yes" ? "Jā, nokļūs" : routeAnswers.zipijs === "no" ? "Nē, nenokļūs" : "Nav atbildes";
+
+      return [
+        "Patstāvīgais darbs: algoritmi, 1. variants",
+        `Skolēns: ${getStudentName()}`,
+        `Kopējie punkti: ${total} / 10`,
+        `Vērtējums: ${grade} / 10`,
+        "",
+        `1. uzdevums: ${task1} / 5 punkti`,
+        `2. uzdevums: ${task2} / 5 punkti`,
+        "",
+        `Lenijs: ${lenijsAnswer}`,
+        `Zipijs: ${zipijsAnswer}`,
+        "",
+        `Pārbaudīts: ${new Date().toLocaleString("lv-LV")}`
+      ].join("\n");
+    }
+
+    async function copyResult() {
+      if (!checked) {
+        submitStatusEl.textContent = "Vispirms nospied “Pārbaudīt darbu”, tad kopē rezultātu.";
+        return;
+      }
+
+      const resultText = buildResultText();
+
+      try {
+        await navigator.clipboard.writeText(resultText);
+        submitStatusEl.textContent = "Rezultāts nokopēts. Tagad skolēns to var ielīmēt e-klasē, Classroom, Teams vai e-pastā.";
+      } catch (error) {
+        submitStatusEl.textContent = "Neizdevās automātiski nokopēt. Iezīmē rezultātu vērtējuma laukā vai izmanto lejupielādes pogu.";
+      }
+    }
+
+    function downloadResult() {
+      if (!checked) {
+        submitStatusEl.textContent = "Vispirms nospied “Pārbaudīt darbu”, tad lejupielādē rezultātu.";
+        return;
+      }
+
+      const resultText = buildResultText();
+      const safeName = getStudentName()
+        .toLowerCase()
+        .replace(/[^a-zāčēģīķļņōŗšūž0-9]+/gi, "_")
+        .replace(/^_+|_+$/g, "") || "skolens";
+
+      const blob = new Blob([resultText], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `patstavigais_darbs_algoritmi_${safeName}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      submitStatusEl.textContent = "Rezultāta fails lejupielādēts. Skolēns to var pievienot e-klasē, Classroom, Teams vai e-pastā.";
+    }
+
+    function drawSnowmanCards() {
+      snowmanTaskEl.innerHTML = "";
+
+      snowCards.forEach((card, index) => {
+        const div = document.createElement("div");
+        div.className = "snow-card";
+
+        const picture = document.createElement("div");
+        picture.className = "snow-picture";
+        picture.innerHTML = createSnowmanSvg(card.type);
+
+        const select = document.createElement("select");
+        select.className = "snow-select";
+        select.setAttribute("aria-label", `${card.title} kārtas numurs`);
+        select.innerHTML = `
+          <option value="">Izvēlies numuru</option>
+          <option value="1">1.</option>
+          <option value="2">2.</option>
+          <option value="3">3.</option>
+          <option value="4">4.</option>
+          <option value="5">5.</option>
+        `;
+        select.value = snowAnswers[card.id] || "";
+        select.onchange = () => {
+          snowAnswers[card.id] = select.value;
+          checked = false;
+          updateScore();
+        };
+
+        const caption = document.createElement("div");
+        caption.textContent = `Kartiņa ${index + 1}`;
+        caption.style.fontWeight = "bold";
+
+        const result = document.createElement("div");
+        result.className = "snow-result";
+
+        if (checked) {
+          if (Number(snowAnswers[card.id]) === card.correct) {
+            result.textContent = "Pareizi";
+            result.classList.add("correct-text");
+          } else {
+            result.textContent = `Pareizi: ${card.correct}.`;
+            result.classList.add("wrong-text");
+          }
+        }
+
+        div.appendChild(picture);
+        div.appendChild(caption);
+        div.appendChild(select);
+        div.appendChild(result);
+        snowmanTaskEl.appendChild(div);
+      });
+    }
+
+    function createSnowmanSvg(type) {
+      const parts = {
+        one: `
+          <circle cx="50" cy="62" r="23" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+        `,
+        two: `
+          <circle cx="50" cy="67" r="25" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="35" r="19" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+        `,
+        three: `
+          <circle cx="50" cy="72" r="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="43" r="19" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="17" r="15" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+        `,
+        decorated: `
+          <circle cx="50" cy="72" r="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="43" r="19" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="17" r="15" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="44" cy="14" r="2.5" fill="#111827"/>
+          <circle cx="56" cy="14" r="2.5" fill="#111827"/>
+          <path d="M47 22 Q50 25 54 22" fill="none" stroke="#111827" stroke-width="2"/>
+          <line x1="31" y1="43" x2="13" y2="30" stroke="#92400e" stroke-width="3" stroke-linecap="round"/>
+          <line x1="69" y1="43" x2="87" y2="30" stroke="#92400e" stroke-width="3" stroke-linecap="round"/>
+        `,
+        hat: `
+          <circle cx="50" cy="72" r="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="43" r="19" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <circle cx="50" cy="17" r="15" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+          <rect x="37" y="0" width="26" height="14" rx="2" fill="#111827"/>
+          <rect x="32" y="13" width="36" height="5" rx="2" fill="#111827"/>
+          <circle cx="44" cy="14" r="2.5" fill="#111827"/>
+          <circle cx="56" cy="14" r="2.5" fill="#111827"/>
+          <path d="M47 22 Q50 25 54 22" fill="none" stroke="#111827" stroke-width="2"/>
+          <line x1="31" y1="43" x2="13" y2="30" stroke="#92400e" stroke-width="3" stroke-linecap="round"/>
+          <line x1="69" y1="43" x2="87" y2="30" stroke="#92400e" stroke-width="3" stroke-linecap="round"/>
+        `
+      };
+
+      return `<svg class="snowman-svg" viewBox="0 0 100 100" aria-hidden="true">${parts[type]}</svg>`;
+    }
+
+    function drawRoutes() {
+      routesEl.innerHTML = "";
+
+      routeTasks.forEach(task => {
+        const card = document.createElement("div");
+        card.className = "route-card";
+
+        const title = document.createElement("div");
+        title.className = "route-title";
+
+        const titleInline = document.createElement("span");
+        titleInline.className = "route-title-inline";
+
+        if (task.id === "zipijs") {
+          titleInline.appendChild(createCuteComputer("small"));
+        } else {
+          const icon = document.createElement("span");
+          icon.textContent = task.emoji;
+          titleInline.appendChild(icon);
+        }
+
+        const name = document.createElement("span");
+        name.textContent = task.name;
+        titleInline.appendChild(name);
+
+        title.appendChild(titleInline);
+
+        const arrows = document.createElement("div");
+        arrows.className = "arrow-row";
+
+        task.arrows.forEach(direction => {
+          const box = document.createElement("div");
+          box.className = "arrow-box";
+          box.textContent = arrowSymbols[direction];
+          arrows.appendChild(box);
+        });
+
+        const answers = document.createElement("div");
+        answers.className = "answer-buttons";
+
+        ["yes", "no"].forEach(value => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice";
+          button.textContent = value === "yes" ? "Jā, nokļūs" : "Nē, nenokļūs";
+
+          if (routeAnswers[task.id] === value) button.classList.add("selected");
+
+          if (checked && routeAnswers[task.id] === value) {
+            if (value === task.correct) button.classList.add("correct");
+            else button.classList.add("wrong");
+          }
+
+          button.onclick = () => {
+            routeAnswers[task.id] = value;
+            checked = false;
+            drawRoutes();
+            updateScore();
+          };
+
+          answers.appendChild(button);
+        });
+
+        card.appendChild(title);
+        card.appendChild(arrows);
+        card.appendChild(answers);
+        routesEl.appendChild(card);
+      });
+    }
+
+    function getRoutePath(task) {
+      let current = { ...task.start };
+      const path = [{ ...current }];
+
+      task.arrows.forEach(direction => {
+        current = {
+          r: current.r + deltas[direction].r,
+          c: current.c + deltas[direction].c
+        };
+        path.push({ ...current });
+      });
+
+      return path;
+    }
+
+    function sameCell(a, b) {
+      return a.r === b.r && a.c === b.c;
+    }
+
+    function drawMap() {
+      mapEl.innerHTML = "";
+      const lenijsPath = pathsVisible ? getRoutePath(routeTasks.find(task => task.id === "lenijs")) : [];
+      const zipijsPath = pathsVisible ? getRoutePath(routeTasks.find(task => task.id === "zipijs")) : [];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = document.createElement("div");
+          cell.className = "map-cell";
+
+          if (lenijsPath.some(point => sameCell(point, { r, c }))) {
+            const dot = document.createElement("div");
+            dot.className = "path-dot lenijs-path";
+            cell.appendChild(dot);
+          }
+
+          if (zipijsPath.some(point => sameCell(point, { r, c }))) {
+            const dot = document.createElement("div");
+            dot.className = "path-dot zipijs-path";
+            cell.appendChild(dot);
+          }
+
+          const character = routeTasks.find(task => sameCell(task.start, { r, c }));
+          if (character) {
+            if (character.id === "zipijs") {
+              cell.appendChild(createCuteComputer());
+            } else {
+              const span = document.createElement("div");
+              span.className = "character";
+              span.textContent = character.emoji;
+              cell.appendChild(span);
+            }
+
+            const label = document.createElement("div");
+            label.className = "small-label";
+            label.textContent = character.name;
+            cell.appendChild(label);
+          }
+
+          if (sameCell(tree, { r, c })) {
+            const span = document.createElement("div");
+            span.className = "character";
+            span.textContent = "🎄";
+            cell.appendChild(span);
+
+            const label = document.createElement("div");
+            label.className = "small-label";
+            label.textContent = "Eglīte";
+            cell.appendChild(label);
+          }
+
+          mapEl.appendChild(cell);
+        }
+      }
+    }
+
+    function getTask1Points() {
+      return snowCards.reduce((sum, card) => {
+        return sum + (Number(snowAnswers[card.id]) === card.correct ? 1 : 0);
+      }, 0);
+    }
+
+    function getTask2Points() {
+      const lenijsCorrect = routeAnswers.lenijs === "no";
+      const zipijsCorrect = routeAnswers.zipijs === "yes";
+      let points = 0;
+
+      if (lenijsCorrect) points += 2;
+      if (zipijsCorrect) points += 2;
+      if (lenijsCorrect && zipijsCorrect) points += 1;
+
+      return points;
+    }
+
+    function getTotalPoints() {
+      return getTask1Points() + getTask2Points();
+    }
+
+    function getGrade(points) {
+      return Math.round(points);
+    }
+
+    function checkWork() {
+      checked = true;
+      const total = getTotalPoints();
+      const grade = getGrade(total);
+
+      drawSnowmanCards();
+      drawRoutes();
+      updateScore();
+
+      task1PointsEl.textContent = `1. uzdevums: ${getTask1Points()} / 5 punkti.`;
+      task1PointsEl.className = getTask1Points() === 5 ? "points-box done" : "points-box";
+
+      task2PointsEl.textContent = `2. uzdevums: ${getTask2Points()} / 5 punkti.`;
+      task2PointsEl.className = getTask2Points() === 5 ? "points-box done" : "points-box";
+
+      if (total === 10) {
+        messageEl.textContent = "Darbs izpildīts izcili. Visi uzdevumi ir pareizi.";
+        feedbackEl.textContent = "Izcili! Tu ļoti rūpīgi pārbaudīji algoritmus un secību.";
+        feedbackEl.className = "feedback excellent";
+      } else if (total >= 7) {
+        messageEl.textContent = "Darbs izpildīts labi. Dažas vietas vēl var uzlabot.";
+        feedbackEl.textContent = "Labi paveikts! Pārskati kļūdainās vietas un mēģini iegūt vēl vairāk punktu.";
+        feedbackEl.className = "feedback excellent";
+      } else {
+        messageEl.textContent = "Darbu vēl vajag uzlabot. Apskati norādes un pārbaudi vēlreiz.";
+        feedbackEl.textContent = "Labs mēģinājums. Kļūdas palīdz mācīties — izlabo atbildes un pārbaudi vēlreiz.";
+        feedbackEl.className = "feedback try-again";
+      }
+
+      finalGradeEl.innerHTML = `
+        <strong>Vērtējums: ${grade} / 10</strong>
+        Kopā iegūti ${total} no 10 punktiem.
+      `;
+
+      submitStatusEl.textContent = "Darbs pārbaudīts. Tagad vari kopēt rezultātu vai lejupielādēt .txt failu iesniegšanai skolotājai.";
+    }
+
+    function updateScore() {
+      const total = checked ? getTotalPoints() : 0;
+      const grade = checked ? getGrade(total) : "—";
+      scoreTotalEl.textContent = checked ? `${total} / 10` : "0 / 10";
+      scoreGradeEl.textContent = String(grade);
+    }
+
+    function showPaths() {
+      pathsVisible = !pathsVisible;
+      drawMap();
+      messageEl.textContent = pathsVisible
+        ? "Kartē redzami tēlu veiktie ceļi. Lenija ceļš ir zilā krāsā, bet Zipija ceļš ir rozā krāsā."
+        : "Ceļi paslēpti. Vari turpināt darbu.";
+    }
+
+    function resetWork() {
+      Object.keys(snowAnswers).forEach(key => delete snowAnswers[key]);
+      Object.keys(routeAnswers).forEach(key => delete routeAnswers[key]);
+
+      checked = false;
+      pathsVisible = false;
+
+      drawSnowmanCards();
+      drawRoutes();
+      drawMap();
+
+      task1PointsEl.textContent = "1. uzdevums: vēl nav pārbaudīts. Maksimums: 5 punkti.";
+      task1PointsEl.className = "points-box";
+
+      task2PointsEl.textContent = "2. uzdevums: vēl nav pārbaudīts. Maksimums: 5 punkti.";
+      task2PointsEl.className = "points-box";
+
+      messageEl.textContent = "Kad abi uzdevumi izpildīti, spied “Pārbaudīt darbu”.";
+      feedbackEl.textContent = "Darbs vēl nav pārbaudīts.";
+      feedbackEl.className = "feedback";
+
+      finalGradeEl.innerHTML = `
+        <strong>Vērtējums vēl nav piešķirts.</strong>
+        Aizpildi uzdevumus un pārbaudi darbu.
+      `;
+
+      submitStatusEl.textContent = "Pēc pārbaudes vari kopēt rezultātu vai lejupielādēt to kā .txt failu un nosūtīt skolotājai.";
+
+      updateScore();
+    }
+
+    drawSnowmanCards();
+    drawRoutes();
+    drawMap();
+    updateScore();
+  </script>
+</body>
+</html>
