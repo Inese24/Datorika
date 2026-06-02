@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lenijs tiek pie datora</title>
+  <title>Zipija algoritma pieraksts</title>
   <style>
     :root {
       --bg: #0f172a;
       --card: #111827;
       --text: #f8fafc;
       --muted: #cbd5e1;
-      --grid: #94a3b8;
+      --grid: #475569;
       --cell: #f8fafc;
-      --cell-dark: #d1d5db;
-      --blue: #3b82f6;
+      --cell-text: #111827;
+      --blocked: #fdc38f;
+      --accent: #60a5fa;
       --good: #22c55e;
       --bad: #ef4444;
       --warn: #f59e0b;
-      --panel: #172554;
+      --blue-panel: #172554;
     }
 
     * { box-sizing: border-box; }
@@ -30,7 +31,7 @@
     }
 
     header {
-      max-width: 1120px;
+      max-width: 1180px;
       margin: 0 auto;
       padding: 28px 18px 10px;
       text-align: center;
@@ -38,7 +39,7 @@
 
     h1 {
       margin: 0 0 10px;
-      font-size: clamp(26px, 4vw, 40px);
+      font-size: clamp(25px, 4vw, 40px);
     }
 
     header p {
@@ -48,237 +49,21 @@
       line-height: 1.45;
     }
 
-    main {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 18px;
-      display: grid;
-      gap: 18px;
-    }
-
-    .task-card {
-      background: var(--card);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    }
-
-    .task-title {
-      margin: 0 0 14px;
-      font-size: 22px;
-    }
-
-    .task-layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-
-    @media (max-width: 820px) {
-      .task-layout { grid-template-columns: 1fr; }
-    }
-
-    .map {
-      display: grid;
-      width: max-content;
-      border: 3px solid var(--grid);
-      background: var(--grid);
-      gap: 3px;
-      margin: 0 auto;
-    }
-
-    .cell {
-      width: 86px;
-      height: 86px;
-      background: var(--cell);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      font-size: 42px;
-    }
-
-    .blocked {
-      background: #9ca3af;
-    }
-
-    .robot::after,
-    .computer::after {
-      position: relative;
-      z-index: 2;
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25));
-    }
-
-    .robot::after { content: "🤖"; }
-    .computer::after { content: "🖥️"; }
-
-    .path-dot {
-      position: absolute;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: rgba(59,130,246,0.78);
-      border: 3px solid #1d4ed8;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .answer-area {
-      display: grid;
-      gap: 12px;
-      align-content: start;
-    }
-
-    .drop-zone {
-      min-height: 70px;
-      border-radius: 16px;
-      background: #0f172a;
-      border: 2px dashed #60a5fa;
-      padding: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.35;
-    }
-
-    .student-step {
-      width: 46px;
-      height: 46px;
-      border-radius: 10px;
-      background: #172554;
-      border: 2px solid #60a5fa;
-      color: #dbeafe;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 31px;
-      font-weight: bold;
-    }
-
-    .arrow-bank {
-      display: grid;
-      grid-template-columns: repeat(4, 58px);
-      gap: 10px;
-      align-items: center;
-    }
-
-    .arrow-button {
-      width: 58px;
-      height: 58px;
-      border: 4px solid #7c7c7c;
-      background: #f8fafc;
-      color: #111827;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 38px;
-      font-weight: 900;
-      line-height: 1;
-      cursor: pointer;
-      padding: 0;
-      border-radius: 0;
-    }
-
-    .arrow-button:hover {
-      outline: 4px solid rgba(96,165,250,0.45);
-      outline-offset: 2px;
-    }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    @media (max-width: 560px) {
-      .buttons { grid-template-columns: 1fr; }
-    }
-
-    .control {
-      border: 0;
-      border-radius: 12px;
-      padding: 12px 10px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      color: white;
-      background: #2563eb;
-    }
-
-    .control:hover { filter: brightness(1.08); }
-    .secondary { background: #475569; }
-    .bad { background: var(--bad); }
-    .good { background: var(--good); color: #052e16; }
-
-    .message {
-      min-height: 64px;
-      border-radius: 14px;
-      background: var(--panel);
-      color: #dbeafe;
-      padding: 12px;
-      font-size: 16px;
-      line-height: 1.4;
-      font-weight: bold;
-    }
-
-    .feedback {
-      min-height: 56px;
-      border-radius: 14px;
-      background: #1e293b;
-      border: 1px solid #475569;
-      color: #e2e8f0;
-      padding: 12px;
-      font-size: 16px;
-      line-height: 1.4;
-      font-weight: bold;
-    }
-
-    .feedback.excellent {
-      background: #052e16;
-      border-color: var(--good);
-      color: #dcfce7;
-    }
-
-    .feedback.good-job {
-      background: #172554;
-      border-color: #60a5fa;
-      color: #dbeafe;
-    }
-
-    .feedback.try-again {
-      background: #451a03;
-      border-color: var(--warn);
-      color: #ffedd5;
-    }
-
-    .small {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
     .scoreboard {
-      max-width: 1120px;
+      max-width: 1180px;
       margin: 14px auto 0;
+      padding: 0 18px;
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
-      padding: 0 18px;
     }
 
-    @media (max-width: 720px) {
-      .scoreboard {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 740px) {
+      .scoreboard { grid-template-columns: 1fr; }
     }
 
     .score-card {
-      background: #111827;
+      background: var(--card);
       border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: 16px;
       padding: 14px;
@@ -300,18 +85,291 @@
       line-height: 1.3;
     }
 
-    .task-points {
-      border-radius: 14px;
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .task-text {
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .task-text strong { color: var(--accent); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .grid-wrap {
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 78px);
+      grid-template-rows: repeat(5, 78px);
+      width: max-content;
+      margin: 0 auto;
+      border: 3px solid var(--grid);
+      background: var(--grid);
+      gap: 2px;
+    }
+
+    .cell {
+      width: 78px;
+      height: 78px;
+      background: var(--cell);
+      color: var(--cell-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: 42px;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    .blocked {
+      background: var(--blocked);
+    }
+
+    .zipijs,
+    .lenijs {
+      font-size: 42px;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.28));
+    }
+
+    .cute-computer {
+      width: 48px;
+      height: 44px;
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.22));
+    }
+
+    .cute-screen {
+      width: 42px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #7dd3fc 0%, #38bdf8 100%);
+      border: 2px solid #1d4ed8;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cute-face {
+      position: absolute;
+      width: 22px;
+      height: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      top: 8px;
+    }
+
+    .cute-eye {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #111827;
+    }
+
+    .cute-mouth {
+      position: absolute;
+      width: 12px;
+      height: 6px;
+      border-bottom: 2px solid #111827;
+      border-radius: 0 0 10px 10px;
+      left: 50%;
+      top: 7px;
+      transform: translateX(-50%);
+    }
+
+    .cute-base {
+      position: absolute;
+      bottom: 5px;
+      width: 20px;
+      height: 4px;
+      background: #94a3b8;
+      border-radius: 3px;
+    }
+
+    .cute-stand {
+      position: absolute;
+      bottom: 9px;
+      width: 8px;
+      height: 7px;
+      background: #cbd5e1;
+      border-radius: 0 0 4px 4px;
+    }
+
+    .label {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      bottom: 3px;
+      font-size: 10px;
+      color: #111827;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option {
+      border: 2px solid #475569;
+      border-radius: 16px;
       background: #0f172a;
-      border: 1px solid #475569;
       padding: 12px;
-      color: #e2e8f0;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .option:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .option.selected {
+      border-color: var(--warn);
+      background: #451a03;
+    }
+
+    .option.correct {
+      border-color: var(--good);
+      background: #052e16;
+    }
+
+    .option.wrong {
+      border-color: var(--bad);
+      background: #450a0a;
+    }
+
+    .option-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .arrow-sequence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .small-arrow {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 10px;
       font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+    }
+
+    button:hover { filter: brightness(1.08); }
+    .good-btn { background: var(--good); color: #052e16; }
+    .bad-btn { background: var(--bad); }
+
+    .message {
+      min-height: 76px;
+      border-radius: 16px;
+      background: var(--blue-panel);
+      color: #dbeafe;
+      padding: 14px;
+      font-size: 17px;
       line-height: 1.4;
       font-weight: bold;
     }
 
-    .task-points.done {
+    .feedback {
+      min-height: 58px;
+      border-radius: 16px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 14px;
+      font-size: 17px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .feedback.excellent {
+      background: #052e16;
+      border-color: var(--good);
+      color: #dcfce7;
+    }
+
+    .feedback.try-again {
+      background: #451a03;
+      border-color: var(--warn);
+      color: #ffedd5;
+    }
+
+    .points {
+      border-radius: 16px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 14px;
+      font-size: 17px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .points.done {
       background: #052e16;
       border-color: var(--good);
       color: #dcfce7;
@@ -322,24 +380,24 @@
       text-align: center;
       font-size: 13px;
       line-height: 1.35;
-      padding-bottom: 20px;
+      padding-bottom: 22px;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Lenijs tiek pie datora</h1>
-    <p>Norādi soli vai soļus, kā lai Lenijs tiek pie datora. Klikšķini uz virziena bultām pareizā secībā.</p>
+    <h1>Zipija algoritma pieraksts</h1>
+    <p>Ir dots algoritms, kurā Zipijs mēro ceļu pie Lenija. Nosaki, kurš no trīs algoritma pierakstiem ir pareizs.</p>
   </header>
 
   <section class="scoreboard" aria-label="Vērtējuma punkti">
     <div class="score-card">
-      <span id="scoreTotal" class="score-number">0 / 11</span>
-      <span class="score-label">kopējie punkti</span>
+      <span id="scoreTotal" class="score-number">0 / 1</span>
+      <span class="score-label">vērtējuma punkti</span>
     </div>
     <div class="score-card">
-      <span id="scoreSolved" class="score-number">0</span>
-      <span class="score-label">pareizi izpildīti uzdevumi</span>
+      <span id="scoreAttempts" class="score-number">0</span>
+      <span class="score-label">pārbaudes mēģinājumi</span>
     </div>
     <div class="score-card">
       <span id="scorePercent" class="score-number">0%</span>
@@ -347,482 +405,249 @@
     </div>
   </section>
 
-  <main id="tasks"></main>
+  <main>
+    <section class="panel task-text">
+      <strong>Uzdevums.</strong> Salīdzini bultiņas kartē ar trim algoritma pierakstiem. Klikšķini uz tā varianta, kurš, tavuprāt, ir pareizs, un spied <strong>“Pārbaudīt”</strong>.
+    </section>
+
+    <section class="layout">
+      <div class="panel grid-wrap">
+        <div id="grid" class="grid" aria-label="Zipija ceļa algoritma karte"></div>
+      </div>
+
+      <aside class="panel controls">
+        <div id="options" class="options"></div>
+
+        <div class="buttons">
+          <button class="bad-btn" onclick="resetTask()">Sākt no jauna</button>
+          <button class="good-btn" onclick="checkAnswer()">Pārbaudīt</button>
+        </div>
+
+        <div id="message" class="message">Izvēlies vienu no variantiem: a), b) vai c).</div>
+        <div id="feedback" class="feedback">Uzdevums gaida tavu risinājumu.</div>
+        <div id="points" class="points">Vērtējuma punkti: vēl nav piešķirti.</div>
+      </aside>
+    </section>
+  </main>
 
   <p class="footer-note">
       Materiāla ideja veidota pēc Start(IT) datorikas uzdevuma. <br>
-	  &copy 2026 Inese Germane
+	  &copy 2026 Inese Germane 
   </p>
 
   <script>
-    const arrowSymbols = {
+    const gridData = [
+      ["zip", "→", "blocked", "blocked", "blocked", "→", "→", "→"],
+      ["blocked", "↓", "→", "blocked", "blocked", "↑", "blocked", "↓"],
+      ["blocked", "blocked", "↓", "blocked", "↑", "→", "blocked", "↓"],
+      ["←", "←", "←", "blocked", "↑", "blocked", "blocked", "↓"],
+      ["↓", "→", "→", "→", "→", "blocked", "lenijs", "←"]
+    ];
+
+    const options = [
+      {
+        id: "a",
+        label: "a)",
+        sequence: ["right","down","right","down","left","down","left","down","right","right","right","right","up","right","right","up","right","right","right","down","down","down","left"]
+      },
+      {
+        id: "b",
+        label: "b)",
+        sequence: ["right","down","right","down","right","left","left","up","right","right","right","right","up","up","right","up","left","right","right","down","down","down","left"]
+      },
+      {
+        id: "c",
+        label: "c)",
+        sequence: ["right","down","right","down","left","left","left","down","right","right","right","right","up","up","right","up","right","right","right","down","down","down","left"]
+      }
+    ];
+
+    const correctOption = "c";
+    let selectedOption = null;
+    let attempts = 0;
+    let solved = false;
+
+    const symbols = {
       up: "↑",
       down: "↓",
       left: "←",
       right: "→"
     };
 
-    const directionNames = {
-      up: "uz augšu",
-      down: "uz leju",
-      left: "pa kreisi",
-      right: "pa labi"
-    };
-
-    const deltas = {
-      up: { r: -1, c: 0 },
-      down: { r: 1, c: 0 },
-      left: { r: 0, c: -1 },
-      right: { r: 0, c: 1 }
-    };
-
-    const tasks = [
-      {
-        title: "1. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 1, c: 1 },
-        computer: { r: 0, c: 1 },
-        blocked: [],
-        answer: ["up"]
-      },
-      {
-        title: "2. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 0, c: 2 },
-        computer: { r: 0, c: 1 },
-        blocked: [],
-        answer: ["left"]
-      },
-      {
-        title: "3. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 1, c: 0 },
-        computer: { r: 1, c: 1 },
-        blocked: [],
-        answer: ["right"]
-      },
-      {
-        title: "4. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 0, c: 1 },
-        computer: { r: 0, c: 0 },
-        blocked: [],
-        answer: ["left"]
-      },
-      {
-        title: "5. uzdevums",
-        rows: 3,
-        cols: 3,
-        robot: { r: 1, c: 1 },
-        computer: { r: 0, c: 0 },
-        blocked: [{ r: 1, c: 0 }],
-        answer: ["up", "left"]
-      },
-      {
-        title: "6. uzdevums",
-        rows: 3,
-        cols: 3,
-        robot: { r: 1, c: 0 },
-        computer: { r: 0, c: 1 },
-        blocked: [{ r: 1, c: 1 }],
-        answer: ["up", "right"]
-      },
-      {
-        title: "7. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 0, c: 0 },
-        computer: { r: 1, c: 2 },
-        blocked: [{ r: 1, c: 1 }],
-        answer: ["right", "right", "down"]
-      },
-      {
-        title: "8. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 1, c: 0 },
-        computer: { r: 0, c: 2 },
-        blocked: [{ r: 1, c: 1 }],
-        answer: ["up", "right", "right"]
-      },
-      {
-        title: "9. uzdevums",
-        rows: 3,
-        cols: 3,
-        robot: { r: 2, c: 2 },
-        computer: { r: 0, c: 0 },
-        blocked: [{ r: 0, c: 2 }, { r: 1, c: 0 }],
-        answer: ["up", "left", "up", "left"],
-        alternatives: [
-          ["left", "up", "up", "left"]
-        ]
-      },
-      {
-        title: "10. uzdevums",
-        rows: 3,
-        cols: 3,
-        robot: { r: 0, c: 2 },
-        computer: { r: 2, c: 0 },
-        blocked: [{ r: 1, c: 1 }, { r: 1, c: 2 }, { r: 2, c: 1 }, { r: 2, c: 2 }],
-        answer: ["left", "left", "down", "down"]
-      },
-      {
-        title: "11. uzdevums",
-        rows: 2,
-        cols: 3,
-        robot: { r: 0, c: 2 },
-        computer: { r: 1, c: 0 },
-        blocked: [{ r: 0, c: 1 }],
-        answer: ["down", "left", "left"]
-      }
-    ];
-
-    const state = tasks.map(() => ({
-      selected: [],
-      attempts: 0,
-      checked: false,
-      solved: false
-    }));
-
-    const tasksEl = document.getElementById("tasks");
+    const gridEl = document.getElementById("grid");
+    const optionsEl = document.getElementById("options");
+    const messageEl = document.getElementById("message");
+    const feedbackEl = document.getElementById("feedback");
+    const pointsEl = document.getElementById("points");
     const scoreTotalEl = document.getElementById("scoreTotal");
-    const scoreSolvedEl = document.getElementById("scoreSolved");
+    const scoreAttemptsEl = document.getElementById("scoreAttempts");
     const scorePercentEl = document.getElementById("scorePercent");
 
-    function sameCell(a, b) {
-      return a.r === b.r && a.c === b.c;
+    function createCuteComputer() {
+      const mascot = document.createElement("div");
+      mascot.className = "cute-computer";
+
+      const screen = document.createElement("div");
+      screen.className = "cute-screen";
+
+      const face = document.createElement("div");
+      face.className = "cute-face";
+
+      const leftEye = document.createElement("div");
+      leftEye.className = "cute-eye";
+
+      const rightEye = document.createElement("div");
+      rightEye.className = "cute-eye";
+
+      const mouth = document.createElement("div");
+      mouth.className = "cute-mouth";
+
+      const stand = document.createElement("div");
+      stand.className = "cute-stand";
+
+      const base = document.createElement("div");
+      base.className = "cute-base";
+
+      face.appendChild(leftEye);
+      face.appendChild(rightEye);
+      screen.appendChild(face);
+      screen.appendChild(mouth);
+      mascot.appendChild(screen);
+      mascot.appendChild(stand);
+      mascot.appendChild(base);
+
+      return mascot;
     }
 
-    function sameSequence(a, b) {
-      return a.length === b.length && a.every((item, index) => item === b[index]);
-    }
+    function drawGrid() {
+      gridEl.innerHTML = "";
 
-    function isCorrectAnswer(task, selected) {
-      const possibleAnswers = [task.answer, ...(task.alternatives || [])];
-      return possibleAnswers.some(answer => sameSequence(selected, answer));
-    }
+      gridData.flat().forEach(item => {
+        const cell = document.createElement("div");
+        cell.className = "cell";
 
-    function expectedStepCount(task) {
-      const possibleAnswers = [task.answer, ...(task.alternatives || [])];
-      return Math.min(...possibleAnswers.map(answer => answer.length));
-    }
+        if (item === "blocked") {
+          cell.classList.add("blocked");
+        } else if (item === "zip") {
+          const zip = createCuteComputer();
+          cell.appendChild(zip);
 
-    function isBlocked(task, r, c) {
-      return task.blocked.some(cell => cell.r === r && cell.c === c);
-    }
+          const label = document.createElement("div");
+          label.className = "label";
+          label.textContent = "Zipijs";
+          cell.appendChild(label);
+        } else if (item === "lenijs") {
+          const lenijs = document.createElement("div");
+          lenijs.className = "lenijs";
+          lenijs.textContent = "🤖";
+          cell.appendChild(lenijs);
 
-    function getPath(task, selected) {
-      const path = [{ ...task.robot }];
-      let current = { ...task.robot };
-
-      for (const direction of selected) {
-        const delta = deltas[direction];
-        current = { r: current.r + delta.r, c: current.c + delta.c };
-        path.push({ ...current });
-      }
-
-      return path;
-    }
-
-    function isValidMovePath(task, selected) {
-      const path = getPath(task, selected);
-
-      for (const point of path) {
-        if (point.r < 0 || point.r >= task.rows || point.c < 0 || point.c >= task.cols) return false;
-        if (isBlocked(task, point.r, point.c)) return false;
-      }
-
-      return true;
-    }
-
-    function getTaskPoints(index) {
-      return state[index].solved ? 1 : 0;
-    }
-
-    function getTotalPoints() {
-      return state.reduce((sum, taskState, index) => sum + getTaskPoints(index), 0);
-    }
-
-    function updateScoreboard() {
-      const total = getTotalPoints();
-      const max = tasks.length;
-      const percent = Math.round((total / max) * 100);
-
-      scoreTotalEl.textContent = `${total} / ${max}`;
-      scoreSolvedEl.textContent = String(total);
-      scorePercentEl.textContent = `${percent}%`;
-    }
-
-    function getTaskPointsText(index) {
-      const taskState = state[index];
-
-      if (taskState.solved) {
-        return "Vērtējuma punkti: 1 / 1";
-      }
-
-      if (taskState.checked) {
-        return "Vērtējuma punkti: 0 / 1. Izlabo atbildi un pārbaudi vēlreiz.";
-      }
-
-      return "Vērtējuma punkti: vēl nav piešķirti. Spied “Pārbaudīt”, kad atbilde ir gatava.";
-    }
-
-    function getTaskPointsClass(index) {
-      return state[index].solved ? "done" : "";
-    }
-
-    function renderAll() {
-      updateScoreboard();
-      tasksEl.innerHTML = "";
-      tasks.forEach((task, index) => renderTask(task, index));
-    }
-
-    function renderTask(task, index) {
-      const taskState = state[index];
-
-      const card = document.createElement("section");
-      card.className = "task-card";
-
-      const title = document.createElement("h2");
-      title.className = "task-title";
-      title.textContent = task.title;
-
-      const layout = document.createElement("div");
-      layout.className = "task-layout";
-
-      layout.appendChild(createMap(task, index));
-
-      const answerArea = document.createElement("aside");
-      answerArea.className = "answer-area";
-
-      const dropZone = document.createElement("div");
-      dropZone.className = "drop-zone";
-
-      if (taskState.selected.length === 0) {
-        dropZone.textContent = "Klikšķini uz bultām. Tavi soļi parādīsies šeit.";
-      } else {
-        taskState.selected.forEach(direction => {
-          const step = document.createElement("div");
-          step.className = "student-step";
-          step.textContent = arrowSymbols[direction];
-          dropZone.appendChild(step);
-        });
-      }
-
-      const arrowBank = document.createElement("div");
-      arrowBank.className = "arrow-bank";
-
-      ["left", "right", "up", "down"].forEach(direction => {
-        const button = document.createElement("button");
-        button.className = "arrow-button";
-        button.textContent = arrowSymbols[direction];
-        button.title = directionNames[direction];
-        button.onclick = () => chooseArrow(index, direction);
-        arrowBank.appendChild(button);
-      });
-
-      const buttons = document.createElement("div");
-      buttons.className = "buttons";
-
-      const undoButton = document.createElement("button");
-      undoButton.className = "control secondary";
-      undoButton.textContent = "Dzēst soli";
-      undoButton.onclick = () => undo(index);
-
-      const resetButton = document.createElement("button");
-      resetButton.className = "control bad";
-      resetButton.textContent = "Sākt no jauna";
-      resetButton.onclick = () => reset(index);
-
-      const checkButton = document.createElement("button");
-      checkButton.className = "control good";
-      checkButton.textContent = "Pārbaudīt";
-      checkButton.onclick = () => check(index);
-
-      buttons.appendChild(undoButton);
-      buttons.appendChild(resetButton);
-      buttons.appendChild(checkButton);
-
-      const message = document.createElement("div");
-      message.className = "message";
-      message.textContent = getMessage(task, index);
-
-      const feedback = document.createElement("div");
-      feedback.className = `feedback ${getFeedbackClass(task, index)}`;
-      feedback.textContent = getFeedbackText(task, index);
-
-      const points = document.createElement("div");
-      points.className = `task-points ${getTaskPointsClass(index)}`;
-      points.textContent = getTaskPointsText(index);
-
-      const info = document.createElement("div");
-      info.className = "small";
-      info.innerHTML = `<strong>Izvēlēti soļi:</strong> ${taskState.selected.length} / ${expectedStepCount(task)}<br>
-                        <strong>Pārbaudes mēģinājumi:</strong> ${taskState.attempts}<br>
-                        <strong>Noteikums:</strong> Lenijs nedrīkst iet ārpus laukuma vai pelēkajā šķērslī.`;
-
-      answerArea.appendChild(dropZone);
-      answerArea.appendChild(arrowBank);
-      answerArea.appendChild(buttons);
-      answerArea.appendChild(message);
-      answerArea.appendChild(feedback);
-      answerArea.appendChild(points);
-      answerArea.appendChild(info);
-
-      layout.appendChild(answerArea);
-      card.appendChild(title);
-      card.appendChild(layout);
-      tasksEl.appendChild(card);
-    }
-
-    function createMap(task, index) {
-      const taskState = state[index];
-      const map = document.createElement("div");
-      map.className = "map";
-      map.style.gridTemplateColumns = `repeat(${task.cols}, 86px)`;
-      map.style.gridTemplateRows = `repeat(${task.rows}, 86px)`;
-
-      const path = getPath(task, taskState.selected).filter(point =>
-        point.r >= 0 && point.r < task.rows && point.c >= 0 && point.c < task.cols
-      );
-
-      for (let r = 0; r < task.rows; r++) {
-        for (let c = 0; c < task.cols; c++) {
-          const cell = document.createElement("div");
-          cell.className = "cell";
-
-          if (isBlocked(task, r, c)) cell.classList.add("blocked");
-          if (sameCell(task.robot, { r, c })) cell.classList.add("robot");
-          if (sameCell(task.computer, { r, c })) cell.classList.add("computer");
-
-          if (path.some(point => sameCell(point, { r, c })) && !sameCell(task.robot, { r, c })) {
-            const dot = document.createElement("div");
-            dot.className = "path-dot";
-            cell.appendChild(dot);
-          }
-
-          map.appendChild(cell);
+          const label = document.createElement("div");
+          label.className = "label";
+          label.textContent = "Lenijs";
+          cell.appendChild(label);
+        } else {
+          cell.textContent = item;
         }
-      }
 
-      return map;
+        gridEl.appendChild(cell);
+      });
     }
 
-    function chooseArrow(taskIndex, direction) {
-      const task = tasks[taskIndex];
-      const taskState = state[taskIndex];
+    function drawOptions() {
+      optionsEl.innerHTML = "";
 
-      if (taskState.selected.length >= expectedStepCount(task)) {
-        taskState.checked = false;
+      options.forEach(option => {
+        const div = document.createElement("div");
+        div.className = "option";
+
+        if (selectedOption === option.id) div.classList.add("selected");
+        if (attempts > 0 && selectedOption === option.id && option.id === correctOption) div.classList.add("correct");
+        if (attempts > 0 && selectedOption === option.id && option.id !== correctOption) div.classList.add("wrong");
+
+        div.onclick = () => selectOption(option.id);
+
+        const title = document.createElement("div");
+        title.className = "option-title";
+        title.textContent = option.label;
+
+        const sequence = document.createElement("div");
+        sequence.className = "arrow-sequence";
+
+        option.sequence.forEach(direction => {
+          const arrow = document.createElement("div");
+          arrow.className = "small-arrow";
+          arrow.textContent = symbols[direction];
+          sequence.appendChild(arrow);
+        });
+
+        div.appendChild(title);
+        div.appendChild(sequence);
+        optionsEl.appendChild(div);
+      });
+    }
+
+    function selectOption(id) {
+      selectedOption = id;
+      messageEl.textContent = `Izvēlēts variants ${id}). Kad esi gatavs, spied “Pārbaudīt”.`;
+      drawOptions();
+    }
+
+    function checkAnswer() {
+      if (!selectedOption) {
+        messageEl.textContent = "Vispirms izvēlies vienu variantu: a), b) vai c).";
+        feedbackEl.textContent = "Sāc ar izvēli, pēc tam pārbaudi savu atbildi.";
+        feedbackEl.className = "feedback try-again";
         return;
       }
 
-      taskState.selected.push(direction);
-      taskState.checked = false;
-      taskState.solved = false;
-      renderAll();
-    }
+      attempts++;
 
-    function undo(taskIndex) {
-      const taskState = state[taskIndex];
-
-      if (taskState.selected.length === 0) return;
-
-      taskState.selected.pop();
-      taskState.checked = false;
-      taskState.solved = false;
-      renderAll();
-    }
-
-    function reset(taskIndex) {
-      state[taskIndex] = {
-        selected: [],
-        attempts: 0,
-        checked: false,
-        solved: false
-      };
-      renderAll();
-    }
-
-    function check(taskIndex) {
-      const task = tasks[taskIndex];
-      const taskState = state[taskIndex];
-      taskState.checked = true;
-      taskState.attempts++;
-
-      const chosen = taskState.selected;
-
-      if (isCorrectAnswer(task, chosen) && isValidMovePath(task, chosen)) {
-        taskState.solved = true;
+      if (selectedOption === correctOption) {
+        solved = true;
+        messageEl.textContent = "Pareizi! Izvēlēts pareizais algoritma pieraksts.";
+        feedbackEl.textContent = attempts === 1
+          ? "Izcili! Tu atradi pareizo pierakstu ar pirmo mēģinājumu."
+          : "Labi paveikts! Tu pārbaudīji savu izvēli un atradi pareizo pierakstu.";
+        feedbackEl.className = "feedback excellent";
+        pointsEl.textContent = "Vērtējuma punkti: 1 / 1";
+        pointsEl.className = "points done";
       } else {
-        taskState.solved = false;
+        solved = false;
+        messageEl.textContent = "Vēl nav pareizi. Salīdzini bultiņas kartē ar izvēlēto pierakstu un mēģini vēlreiz.";
+        feedbackEl.textContent = "Labs mēģinājums. Kļūdas palīdz mācīties — pārbaudi secību un izvēlies citu variantu.";
+        feedbackEl.className = "feedback try-again";
+        pointsEl.textContent = "Vērtējuma punkti: 0 / 1. Izlabo atbildi un pārbaudi vēlreiz.";
+        pointsEl.className = "points";
       }
 
-      renderAll();
+      updateScoreboard();
+      drawOptions();
     }
 
-    function getMessage(task, index) {
-      const taskState = state[index];
-
-      if (!taskState.checked && taskState.selected.length === 0) {
-        return "Sāc ar pirmo soli. Izvēlies bultu, kas Leniju tuvina datoram.";
-      }
-
-      if (!taskState.checked) {
-        return "Turpini izvēlēties bultas pareizā secībā. Kad gatavs, spied “Pārbaudīt”.";
-      }
-
-      if (!isValidMovePath(task, taskState.selected)) {
-        return "Kļūda: kāds solis izved ārpus laukuma vai pelēkajā šķērslī.";
-      }
-
-      if (taskState.solved) {
-        return "Pareizi! Lenijs nokļuva pie datora.";
-      }
-
-      if (taskState.selected.length < expectedStepCount(task)) {
-        return "Vēl trūkst soļu. Apskati laukumu un papildini savu atbildi.";
-      }
-
-      return "Vēl nav pareizi. Pārbaudi virzienu secību un mēģini vēlreiz.";
+    function resetTask() {
+      selectedOption = null;
+      attempts = 0;
+      solved = false;
+      messageEl.textContent = "Izvēlies vienu no variantiem: a), b) vai c).";
+      feedbackEl.textContent = "Uzdevums gaida tavu risinājumu.";
+      feedbackEl.className = "feedback";
+      pointsEl.textContent = "Vērtējuma punkti: vēl nav piešķirti.";
+      pointsEl.className = "points";
+      updateScoreboard();
+      drawOptions();
     }
 
-    function getFeedbackText(task, index) {
-      const taskState = state[index];
-
-      if (taskState.solved && taskState.attempts === 1) {
-        return "Izcili! Tu atradi pareizo ceļu ar pirmo mēģinājumu.";
-      }
-
-      if (taskState.solved) {
-        return "Labi paveikts! Tu pārbaudīji savu darbu un atradi pareizo ceļu.";
-      }
-
-      if (taskState.checked && !taskState.solved) {
-        return "Labs mēģinājums. Kļūdas palīdz mācīties — izlabo soļus un pārbaudi vēlreiz.";
-      }
-
-      if (taskState.selected.length === 0) {
-        return "Uzdevums gaida tavu risinājumu. Izvēlies virziena bultu.";
-      }
-
-      return "Tu strādā pie algoritma. Salīdzini savu ceļu ar Lenija un datora atrašanās vietu.";
+    function updateScoreboard() {
+      const points = solved ? 1 : 0;
+      scoreTotalEl.textContent = `${points} / 1`;
+      scoreAttemptsEl.textContent = String(attempts);
+      scorePercentEl.textContent = solved ? "100%" : "0%";
     }
 
-    function getFeedbackClass(task, index) {
-      const taskState = state[index];
-
-      if (taskState.solved && taskState.attempts === 1) return "excellent";
-      if (taskState.solved) return "good-job";
-      if (taskState.checked && !taskState.solved) return "try-again";
-      return "";
-    }
-
-    renderAll();
+    drawGrid();
+    drawOptions();
+    updateScoreboard();
   </script>
 </body>
 </html>
