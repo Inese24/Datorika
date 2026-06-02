@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aizkrāso pareizās bultas</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --grid: #c7c7c7;
+      --accent: #4f46e5;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --line: #111111;
+      --blue: #4338ca;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 18px 10px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 4vw, 40px);
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .task-card {
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .task-title {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    .task-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 850px) {
+      .task-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .drawing-wrap {
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+
+    svg {
+      display: block;
+      background: white;
+      border-radius: 8px;
+      max-width: 100%;
+      height: auto;
+      touch-action: manipulation;
+    }
+
+    .grid-line {
+      stroke: var(--grid);
+      stroke-width: 4;
+    }
+
+    .shape-line {
+      stroke: var(--line);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .start-point {
+      fill: var(--blue);
+      stroke: #312e81;
+      stroke-width: 2;
+    }
+
+    .answer-area {
+      display: grid;
+      gap: 12px;
+    }
+
+    .arrow-bank {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .arrow-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .arrow-button {
+      width: 58px;
+      height: 58px;
+      border: 4px solid #7c7c7c;
+      background: #f8fafc;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    .arrow-button:hover {
+      outline: 4px solid rgba(96, 165, 250, 0.45);
+      outline-offset: 2px;
+    }
+
+    .arrow-button.selected {
+      background: #fef3c7;
+      border-color: var(--warn);
+    }
+
+    .arrow-button.correct {
+      background: #dcfce7;
+      border-color: var(--good);
+      color: #052e16;
+    }
+
+    .arrow-button.wrong {
+      background: #fee2e2;
+      border-color: var(--bad);
+      color: #7f1d1d;
+    }
+
+    .student-sequence {
+      min-height: 66px;
+      border-radius: 16px;
+      background: #0f172a;
+      border: 1px dashed #475569;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .student-step {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #172554;
+      border: 2px solid #60a5fa;
+      color: #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 560px) {
+      .buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .control {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+    }
+
+    .control:hover {
+      filter: brightness(1.08);
+    }
+
+    .secondary {
+      background: #475569;
+    }
+
+    .bad {
+      background: var(--bad);
+    }
+
+    .good {
+      background: var(--good);
+      color: #052e16;
+    }
+
+    .message {
+      min-height: 64px;
+      border-radius: 14px;
+      background: #172554;
+      color: #dbeafe;
+      padding: 12px;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .feedback {
+      min-height: 54px;
+      border-radius: 14px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 12px;
+      font-size: 16px;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .feedback.excellent {
+      background: #052e16;
+      border-color: #22c55e;
+      color: #dcfce7;
+    }
+
+    .feedback.good-job {
+      background: #172554;
+      border-color: #60a5fa;
+      color: #dbeafe;
+    }
+
+    .feedback.try-again {
+      background: #451a03;
+      border-color: #f59e0b;
+      color: #ffedd5;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.35;
+      padding-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Aizkrāso pareizās bultas</h1>
+    <p>Apskati doto zīmējumu. Sāc no zilā punkta un izvēlies tās bultas, kas izveido redzamo ceļu.</p>
+  </header>
+
+  <main id="tasks"></main>
+
+   <p class="footer-note">
+    Materiāla ideja veidota pēc Start(IT) datorikas uzdevuma. <br>
+	  &copy 2026 Inese Germane
+  </p>
+
+  <script>
+    const arrowSymbols = {
+      up: "↑",
+      down: "↓",
+      left: "←",
+      right: "→"
+    };
+
+    const directionNames = {
+      up: "uz augšu",
+      down: "uz leju",
+      left: "pa kreisi",
+      right: "pa labi"
+    };
+
+    const tasks = [
+      {
+        title: "1. uzdevums",
+        start: { x: 1, y: 4 },
+        path: [
+          { x: 1, y: 4 },
+          { x: 1, y: 2 },
+          { x: 2, y: 2 }
+        ],
+        options: [
+          ["right", "up", "up"],
+          ["up", "up", "right"],
+          ["up", "right", "right"]
+        ],
+        answer: ["up", "up", "right"]
+      },
+      {
+        title: "2. uzdevums",
+        start: { x: 3, y: 3 },
+        path: [
+          { x: 3, y: 3 },
+          { x: 2, y: 3 },
+          { x: 2, y: 4 },
+          { x: 1, y: 4 }
+        ],
+        options: [
+          ["left", "down", "right"],
+          ["down", "left", "down"],
+          ["left", "down", "left"]
+        ],
+        answer: ["left", "down", "left"]
+      },
+      {
+        title: "3. uzdevums",
+        start: { x: 2, y: 1 },
+        path: [
+          { x: 2, y: 1 },
+          { x: 3, y: 1 },
+          { x: 3, y: 3 },
+          { x: 2, y: 3 }
+        ],
+        options: [
+          ["right", "down", "down", "left"],
+          ["right", "right", "down", "down"],
+          ["right", "down", "left", "left"]
+        ],
+        answer: ["right", "down", "down", "left"]
+      },
+      {
+        title: "4. uzdevums",
+        start: { x: 1, y: 2 },
+        path: [
+          { x: 1, y: 2 },
+          { x: 2, y: 2 },
+          { x: 2, y: 1 },
+          { x: 4, y: 1 },
+          { x: 4, y: 2 }
+        ],
+        options: [
+          ["right", "up", "right", "right", "up"],
+          ["right", "up", "right", "right", "down"],
+          ["right", "up", "right", "down", "right"]
+        ],
+        answer: ["right", "up", "right", "right", "down"]
+      },
+      {
+        title: "5. uzdevums",
+        start: { x: 3, y: 2 },
+        path: [
+          { x: 3, y: 2 },
+          { x: 4, y: 2 },
+          { x: 4, y: 3 },
+          { x: 2, y: 3 },
+          { x: 2, y: 2 }
+        ],
+        options: [
+          ["left", "down", "right", "right", "up"],
+          ["right", "down", "left", "up", "up"],
+          ["right", "down", "left", "left", "up"]
+        ],
+        answer: ["right", "down", "left", "left", "up"]
+      }
+    ];
+
+    const state = tasks.map(() => ({
+      selected: [],
+      checked: false,
+      attempts: 0,
+      solved: false
+    }));
+
+    const gridSize = 5;
+    const cell = 56;
+    const margin = 22;
+    const svgSize = margin * 2 + gridSize * cell;
+
+    const tasksEl = document.getElementById("tasks");
+
+    function makeSvgElement(name) {
+      return document.createElementNS("http://www.w3.org/2000/svg", name);
+    }
+
+    function pointToSvg(point) {
+      return {
+        x: margin + point.x * cell,
+        y: margin + point.y * cell
+      };
+    }
+
+    function sameSequence(a, b) {
+      return a.length === b.length && a.every((item, index) => item === b[index]);
+    }
+
+    function renderAll() {
+      tasksEl.innerHTML = "";
+      tasks.forEach((task, index) => renderTask(task, index));
+    }
+
+    function renderTask(task, index) {
+      const taskState = state[index];
+
+      const card = document.createElement("section");
+      card.className = "task-card";
+
+      const title = document.createElement("h2");
+      title.className = "task-title";
+      title.textContent = task.title;
+
+      const layout = document.createElement("div");
+      layout.className = "task-layout";
+
+      const drawingWrap = document.createElement("div");
+      drawingWrap.className = "drawing-wrap";
+      drawingWrap.appendChild(createDrawing(task));
+
+      const answerArea = document.createElement("aside");
+      answerArea.className = "answer-area";
+
+      const arrowBank = document.createElement("div");
+      arrowBank.className = "arrow-bank";
+
+      task.options.forEach((row) => {
+        const rowEl = document.createElement("div");
+        rowEl.className = "arrow-row";
+
+        row.forEach((direction, optionIndex) => {
+          const button = document.createElement("button");
+          button.className = "arrow-button";
+          button.textContent = arrowSymbols[direction];
+          button.title = directionNames[direction];
+
+          const selectedIndex = taskState.selected.findIndex((item) => item.id === `${row.join("-")}-${optionIndex}-${direction}`);
+          if (selectedIndex !== -1) button.classList.add("selected");
+
+          if (taskState.checked) {
+            const chosenDirections = taskState.selected.map(item => item.direction);
+            const isPartOfCorrectAnswer = task.answer.includes(direction);
+            if (sameSequence(chosenDirections, task.answer) && selectedIndex !== -1) {
+              button.classList.add("correct");
+            } else if (selectedIndex !== -1) {
+              button.classList.add("wrong");
+            } else if (isPartOfCorrectAnswer && selectedIndex === -1) {
+              button.classList.add("correct");
+            }
+          }
+
+          button.onclick = () => chooseArrow(index, `${row.join("-")}-${optionIndex}-${direction}`, direction);
+          rowEl.appendChild(button);
+        });
+
+        arrowBank.appendChild(rowEl);
+      });
+
+      const sequence = document.createElement("div");
+      sequence.className = "student-sequence";
+      if (taskState.selected.length === 0) {
+        sequence.textContent = "Klikšķini uz bultām pareizā secībā. Tava izvēle parādīsies šeit.";
+      } else {
+        taskState.selected.forEach(item => {
+          const step = document.createElement("div");
+          step.className = "student-step";
+          step.textContent = arrowSymbols[item.direction];
+          sequence.appendChild(step);
+        });
+      }
+
+      const buttons = document.createElement("div");
+      buttons.className = "buttons";
+
+      const undoButton = document.createElement("button");
+      undoButton.className = "control secondary";
+      undoButton.textContent = "Dzēst soli";
+      undoButton.onclick = () => undo(index);
+
+      const resetButton = document.createElement("button");
+      resetButton.className = "control bad";
+      resetButton.textContent = "Sākt no jauna";
+      resetButton.onclick = () => reset(index);
+
+      const checkButton = document.createElement("button");
+      checkButton.className = "control good";
+      checkButton.textContent = "Pārbaudīt";
+      checkButton.onclick = () => check(index);
+
+      buttons.appendChild(undoButton);
+      buttons.appendChild(resetButton);
+      buttons.appendChild(checkButton);
+
+      const message = document.createElement("div");
+      message.className = "message";
+      message.id = `message-${index}`;
+      message.textContent = getMessage(task, index);
+
+      const info = document.createElement("div");
+      info.className = "small";
+      info.innerHTML = `<strong>Uzdevums:</strong> atrodi bultas, kas no zilā punkta izveido melno līniju.<br>
+                        <strong>Izvēlēti soļi:</strong> ${taskState.selected.length} / ${task.answer.length}<br>
+                        <strong>Pārbaudes mēģinājumi:</strong> ${taskState.attempts}`;
+
+      answerArea.appendChild(arrowBank);
+      answerArea.appendChild(sequence);
+      answerArea.appendChild(buttons);
+      const feedback = document.createElement("div");
+      feedback.className = `feedback ${getFeedbackClass(task, index)}`;
+      feedback.id = `feedback-${index}`;
+      feedback.textContent = getFeedbackText(task, index);
+
+      answerArea.appendChild(message);
+      answerArea.appendChild(feedback);
+      answerArea.appendChild(info);
+
+      layout.appendChild(drawingWrap);
+      layout.appendChild(answerArea);
+
+      card.appendChild(title);
+      card.appendChild(layout);
+      tasksEl.appendChild(card);
+    }
+
+    function createDrawing(task) {
+      const svg = makeSvgElement("svg");
+      svg.setAttribute("viewBox", `0 0 ${svgSize} ${svgSize}`);
+      svg.setAttribute("width", svgSize);
+      svg.setAttribute("height", svgSize);
+      svg.setAttribute("aria-label", `${task.title} zīmējums`);
+
+      for (let i = 0; i <= gridSize; i++) {
+        const x = margin + i * cell;
+        const vertical = makeSvgElement("line");
+        vertical.setAttribute("x1", x);
+        vertical.setAttribute("y1", margin);
+        vertical.setAttribute("x2", x);
+        vertical.setAttribute("y2", margin + gridSize * cell);
+        vertical.setAttribute("class", "grid-line");
+        svg.appendChild(vertical);
+
+        const y = margin + i * cell;
+        const horizontal = makeSvgElement("line");
+        horizontal.setAttribute("x1", margin);
+        horizontal.setAttribute("y1", y);
+        horizontal.setAttribute("x2", margin + gridSize * cell);
+        horizontal.setAttribute("y2", y);
+        horizontal.setAttribute("class", "grid-line");
+        svg.appendChild(horizontal);
+      }
+
+      const expandedPoints = expandPath(task.path);
+      const polyline = makeSvgElement("polyline");
+      polyline.setAttribute("points", expandedPoints.map(point => {
+        const svgPoint = pointToSvg(point);
+        return `${svgPoint.x},${svgPoint.y}`;
+      }).join(" "));
+      polyline.setAttribute("class", "shape-line");
+      svg.appendChild(polyline);
+
+      const startPoint = pointToSvg(task.start);
+      const start = makeSvgElement("circle");
+      start.setAttribute("cx", startPoint.x);
+      start.setAttribute("cy", startPoint.y);
+      start.setAttribute("r", 8);
+      start.setAttribute("class", "start-point");
+      svg.appendChild(start);
+
+      return svg;
+    }
+
+    function expandPath(path) {
+      const result = [];
+
+      for (let i = 0; i < path.length - 1; i++) {
+        const from = path[i];
+        const to = path[i + 1];
+
+        if (result.length === 0) result.push({ ...from });
+
+        const dx = Math.sign(to.x - from.x);
+        const dy = Math.sign(to.y - from.y);
+        let current = { ...from };
+
+        while (current.x !== to.x || current.y !== to.y) {
+          current = { x: current.x + dx, y: current.y + dy };
+          result.push({ ...current });
+        }
+      }
+
+      return result;
+    }
+
+    function chooseArrow(taskIndex, id, direction) {
+      const task = tasks[taskIndex];
+      const taskState = state[taskIndex];
+
+      if (taskState.selected.length >= task.answer.length) {
+        showMessage(taskIndex, "Visi nepieciešamie soļi jau izvēlēti. Spied “Pārbaudīt” vai “Dzēst soli”.");
+        return;
+      }
+
+      taskState.selected.push({ id, direction });
+      taskState.checked = false;
+      renderAll();
+    }
+
+    function undo(taskIndex) {
+      const taskState = state[taskIndex];
+
+      if (taskState.selected.length === 0) {
+        showMessage(taskIndex, "Vēl nav neviena soļa, ko dzēst.");
+        return;
+      }
+
+      taskState.selected.pop();
+      taskState.checked = false;
+      renderAll();
+    }
+
+    function reset(taskIndex) {
+      state[taskIndex] = {
+        selected: [],
+        checked: false,
+        attempts: 0,
+        solved: false
+      };
+      renderAll();
+    }
+
+    function check(taskIndex) {
+      const task = tasks[taskIndex];
+      const taskState = state[taskIndex];
+      taskState.checked = true;
+      taskState.attempts++;
+
+      const chosenDirections = taskState.selected.map(item => item.direction);
+
+      if (sameSequence(chosenDirections, task.answer)) {
+        taskState.solved = true;
+        showMessage(taskIndex, "Pareizi! Izvēlētās bultas izpilda doto zīmējumu.");
+      } else if (chosenDirections.length < task.answer.length) {
+        taskState.solved = false;
+        showMessage(taskIndex, "Vēl trūkst bultu. Apskati zīmējumu un turpini izvēli.");
+      } else {
+        taskState.solved = false;
+        showMessage(taskIndex, "Vēl nav pareizi. Spied “Dzēst soli” vai “Sākt no jauna” un mēģini vēlreiz.");
+      }
+
+      renderAll();
+    }
+
+    function getMessage(task, index) {
+      const taskState = state[index];
+      const chosenDirections = taskState.selected.map(item => item.direction);
+
+      if (taskState.checked && sameSequence(chosenDirections, task.answer)) {
+        return "Pareizi! Izvēlētās bultas izpilda doto zīmējumu.";
+      }
+
+      if (taskState.selected.length === 0) {
+        return "Sāc no zilā punkta. Izvēlies pirmo bultu.";
+      }
+
+      return "Turpini izvēlēties bultas tādā secībā, kā veidojas melnā līnija.";
+    }
+
+    function getFeedbackText(task, index) {
+      const taskState = state[index];
+      const chosenDirections = taskState.selected.map(item => item.direction);
+
+      if (taskState.solved && taskState.attempts === 1) {
+        return "Izcili! Tu atradi pareizās bultas ar pirmo mēģinājumu.";
+      }
+
+      if (taskState.solved) {
+        return "Labi paveikts! Tu izlaboji savu darbu un atradi pareizo risinājumu.";
+      }
+
+      if (taskState.checked && !sameSequence(chosenDirections, task.answer)) {
+        return "Labs mēģinājums. Pārbaudi ceļu no zilā punkta un pamēģini vēlreiz.";
+      }
+
+      if (taskState.selected.length === 0) {
+        return "Uzdevums gaida tavu risinājumu. Sāc ar pirmo bultu.";
+      }
+
+      return "Tu strādā pareizā virzienā. Turpini salīdzināt bultas ar zīmējumu.";
+    }
+
+    function getFeedbackClass(task, index) {
+      const taskState = state[index];
+      const chosenDirections = taskState.selected.map(item => item.direction);
+
+      if (taskState.solved && taskState.attempts === 1) return "excellent";
+      if (taskState.solved) return "good-job";
+      if (taskState.checked && !sameSequence(chosenDirections, task.answer)) return "try-again";
+      return "";
+    }
+
+    function showMessage(index, text) {
+      const message = document.getElementById(`message-${index}`);
+      if (message) message.textContent = text;
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
