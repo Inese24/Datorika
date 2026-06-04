@@ -5,79 +5,468 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Algoritmu varde — skolēnu versija</title>
   <style>
-
-    :root{
-      --bg:#0f172a; --card:#111827; --ink:#f8fafc; --muted:#cbd5e1;
-      --accent:#22c55e; --accent2:#facc15; --danger:#fb7185;
-      --grid:rgba(203,213,225,.38); --soft:#163522; --frog:#22c55e; --water:#172554;
+    /* Krāsu mainīgie */
+        :root {
+      --bg:#0f172a;
+      --card:#111827;
+      --ink:#f8fafc;
+      --muted:#cbd5e1;
+      --accent:#22c55e;
+      --accent2:#facc15;
+      --danger:#fb7185;
+      --grid:rgba(203,213,225,.38);
+      --soft:#163522;
+      --frog:#22c55e;
+      --water:#172554;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+    * {
+      box-sizing:border-box;
+    }
+
+    /* Pamata izkārtojums */
+        body {
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:radial-gradient(circle at top left,rgba(34,197,94,.20) 0,transparent 34%),
-                 radial-gradient(circle at bottom right,rgba(59,130,246,.22) 0,transparent 38%),
-                 linear-gradient(135deg,#020617 0%,#0f172a 55%,#111827 100%);
-      color:var(--ink); min-height:100vh;
+                     radial-gradient(circle at bottom right,rgba(59,130,246,.22) 0,transparent 38%),
+                     linear-gradient(135deg,#020617 0%,#0f172a 55%,#111827 100%);
+      color:var(--ink);
+      min-height:100vh;
     }
-    header{padding:18px 20px 10px;text-align:center}
-    h1{margin:0 0 6px;font-size:clamp(1.6rem,4vw,2.6rem)}
-    .subtitle{margin:0 auto;color:var(--muted);max-width:850px;line-height:1.45}
-    main{max-width:1100px;margin:0 auto;padding:12px 16px 32px}
-    .topbar{
-      display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;
-      background:rgba(15,23,42,.86);border:1px solid rgba(148,163,184,.28);
-      border-radius:18px;padding:12px;box-shadow:0 12px 36px rgba(0,0,0,.32);
-      margin-bottom:16px;backdrop-filter:blur(8px);
-    }
-    .progress{font-weight:700}
-    .score-panel{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px;font-weight:800}
-    .score-pill{background:#020617;border:1px solid rgba(148,163,184,.35);border-radius:999px;padding:6px 10px;box-shadow:0 2px 10px rgba(0,0,0,.28)}
-    .score-plus{color:#86efac}.score-minus{color:#fda4af}
-    .small{font-size:.94rem;color:var(--muted)}
-    .level-nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-    .level-dot{border:1px solid rgba(148,163,184,.32);background:#020617;color:var(--ink);min-width:36px;height:36px;border-radius:999px;cursor:pointer;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.28)}
-    .level-dot.active{background:var(--accent);color:#052e16;border-color:var(--accent)}
-    .level-dot.done{outline:3px solid var(--accent2)}
-    .layout{display:grid;grid-template-columns:minmax(290px,1fr) minmax(280px,410px);gap:16px;align-items:start}
-    @media (max-width:850px){.layout{grid-template-columns:1fr}}
-    .card{background:rgba(17,24,39,.94);border:1px solid rgba(148,163,184,.26);border-radius:22px;padding:18px;box-shadow:0 18px 45px rgba(0,0,0,.38)}
-    .level-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-    .level-title h2{margin:0;font-size:1.55rem}
-    .badge{background:#14532d;color:#dcfce7;border-radius:999px;padding:6px 10px;font-weight:700;font-size:.9rem}
-    .instruction{font-size:1.05rem;line-height:1.5;margin:10px 0 14px}
-    .game-area{position:relative;margin:auto;max-width:520px}
-    .grid{position:relative;display:grid;gap:0;width:min(84vw,500px);aspect-ratio:1/1;margin:auto;background:radial-gradient(circle at center,rgba(96,165,250,.22),transparent 65%),var(--water);border:4px solid rgba(134,239,172,.65);border-radius:18px;overflow:hidden;box-shadow:inset 0 0 28px rgba(0,0,0,.25)}
-    .cell{border-right:1px dashed var(--grid);border-bottom:1px dashed var(--grid);background:rgba(255,255,255,.05)}
-    .cell:nth-child(odd){background:rgba(255,255,255,.025)}
-    .marker{position:absolute;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;font-weight:900;z-index:4}
-    .start{background:#38bdf8;color:#082f49;box-shadow:0 2px 12px rgba(56,189,248,.5)}
-    .target{background:var(--accent2);color:#422006;box-shadow:0 2px 12px rgba(250,204,21,.42)}
-    .crumb{position:absolute;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(250,204,21,.62);border:2px solid rgba(254,240,138,.85);z-index:2;box-shadow:0 0 10px rgba(250,204,21,.35)}
-    .frog{position:absolute;width:38px;height:38px;transform:translate(-50%,-50%);border-radius:50%;background:var(--frog);color:#052e16;display:grid;place-items:center;font-size:1.4rem;z-index:5;box-shadow:0 6px 18px rgba(34,197,94,.35);transition:left .22s,top .22s;font-weight:900}
-    svg.path{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
-    .command-box{min-height:64px;background:#020617;border:2px dashed rgba(134,239,172,.45);border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-    .arrow-chip{min-width:42px;height:42px;border-radius:12px;border:1px solid rgba(148,163,184,.35);background:#0f172a;color:#f8fafc;display:grid;place-items:center;font-size:1.5rem;font-weight:900;box-shadow:0 2px 10px rgba(0,0,0,.24)}
-    .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
-    button{font:inherit}
-    .btn{border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:11px 12px;background:#0f172a;color:#f8fafc;cursor:pointer;font-weight:800;box-shadow:0 3px 12px rgba(0,0,0,.24)}
-    .btn:hover{transform:translateY(-1px);background:#1e293b}
-    .btn.primary{background:#16a34a;color:#f0fdf4;border-color:#22c55e}
-    .btn.primary:hover{background:#15803d}
-    .btn.warn{background:#713f12;color:#fef3c7;border-color:#a16207}
-    .btn.warn:hover{background:#854d0e}
-    .btn.danger{background:#7f1d1d;color:#ffe4e6;border-color:#be123c}
-    .btn.danger:hover{background:#991b1b}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .message{margin-top:12px;padding:12px;border-radius:14px;background:#020617;color:var(--muted);min-height:48px;line-height:1.4;border:1px solid rgba(148,163,184,.20)}
-    .message.ok{background:#052e16;color:#bbf7d0;border-color:#16a34a}
-    .message.bad{background:#450a0a;color:#fecaca;border-color:#dc2626}
-    .teacher{margin-top:12px;border-top:1px solid rgba(148,163,184,.24);padding-top:12px}
-    .solution{display:none;margin-top:8px;background:#020617;border:1px solid rgba(148,163,184,.24);border-radius:14px;padding:10px;line-height:1.9;font-size:1.25rem;letter-spacing:.08em;word-break:break-word;color:#f8fafc}
-    .solution.show{display:block}
-    .page-controls{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
-    .task-note{background:#071b12;border-left:5px solid var(--accent);border-radius:12px;padding:10px 12px;color:#dcfce7;margin-top:12px;line-height:1.45}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
+    header {
+      padding:18px 20px 10px;
+      text-align:center;
+    }
+
+    h1 {
+      margin:0 0 6px;
+      font-size:clamp(1.6rem,4vw,2.6rem);
+    }
+
+    .subtitle {
+      margin:0 auto;
+      color:var(--muted);
+      max-width:850px;
+      line-height:1.45;
+    }
+
+    main {
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 16px 32px;
+    }
+
+    /* Augšējā josla un uzdevumu navigācija */
+        .topbar {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      background:rgba(15,23,42,.86);
+      border:1px solid rgba(148,163,184,.28);
+      border-radius:18px;
+      padding:12px;
+      box-shadow:0 12px 36px rgba(0,0,0,.32);
+      margin-bottom:16px;
+      backdrop-filter:blur(8px);
+    }
+
+    .progress {
+      font-weight:700;
+    }
+
+    .score-panel {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top:6px;
+      font-weight:800;
+    }
+
+    .score-pill {
+      background:#020617;
+      border:1px solid rgba(148,163,184,.35);
+      border-radius:999px;
+      padding:6px 10px;
+      box-shadow:0 2px 10px rgba(0,0,0,.28);
+    }
+
+    .score-plus {
+      color:#86efac;
+    }
+
+    .score-minus {
+      color:#fda4af;
+    }
+
+    .small {
+      font-size:.94rem;
+      color:var(--muted);
+    }
+
+    .level-nav {
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    .level-dot {
+      border:1px solid rgba(148,163,184,.32);
+      background:#020617;
+      color:var(--ink);
+      min-width:36px;
+      height:36px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow:0 2px 10px rgba(0,0,0,.28);
+    }
+
+    .level-dot.active {
+      background:var(--accent);
+      color:#052e16;
+      border-color:var(--accent);
+    }
+
+    .level-dot.done {
+      outline:3px solid var(--accent2);
+    }
+
+    /* Galvenais saturs */
+        .layout {
+      display:grid;
+      grid-template-columns:minmax(290px,1fr) minmax(280px,410px);
+      gap:16px;
+      align-items:start;
+    }
+
+    @media (max-width:850px) {
+      .layout {
+        grid-template-columns:1fr;
+      }
+
+    }
+
+    .card {
+      background:rgba(17,24,39,.94);
+      border:1px solid rgba(148,163,184,.26);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 18px 45px rgba(0,0,0,.38);
+    }
+
+    .level-title {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:10px;
+    }
+
+    .level-title h2 {
+      margin:0;
+      font-size:1.55rem;
+    }
+
+    .badge {
+      background:#14532d;
+      color:#dcfce7;
+      border-radius:999px;
+      padding:6px 10px;
+      font-weight:700;
+      font-size:.9rem;
+    }
+
+    .instruction {
+      font-size:1.05rem;
+      line-height:1.5;
+      margin:10px 0 14px;
+    }
+
+    .game-area {
+      position:relative;
+      margin:auto;
+      max-width:520px;
+    }
+
+    /* Spēles režģis */
+        .grid {
+      position:relative;
+      display:grid;
+      gap:0;
+      width:min(84vw,500px);
+      aspect-ratio:1/1;
+      margin:auto;
+      background:radial-gradient(circle at center,rgba(96,165,250,.22),transparent 65%),var(--water);
+      border:4px solid rgba(134,239,172,.65);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:inset 0 0 28px rgba(0,0,0,.25);
+    }
+
+    .cell {
+      border-right:1px dashed var(--grid);
+      border-bottom:1px dashed var(--grid);
+      background:rgba(255,255,255,.05);
+    }
+
+    .cell:nth-child(odd) {
+      background:rgba(255,255,255,.025);
+    }
+
+    .marker {
+      position:absolute;
+      width:34px;
+      height:34px;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      z-index:4;
+    }
+
+    .start {
+      background:#38bdf8;
+      color:#082f49;
+      box-shadow:0 2px 12px rgba(56,189,248,.5);
+    }
+
+    .target {
+      background:var(--accent2);
+      color:#422006;
+      box-shadow:0 2px 12px rgba(250,204,21,.42);
+    }
+
+    .crumb {
+      position:absolute;
+      width:18px;
+      height:18px;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background:rgba(250,204,21,.62);
+      border:2px solid rgba(254,240,138,.85);
+      z-index:2;
+      box-shadow:0 0 10px rgba(250,204,21,.35);
+    }
+
+    .frog {
+      position:absolute;
+      width:38px;
+      height:38px;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background:var(--frog);
+      color:#052e16;
+      display:grid;
+      place-items:center;
+      font-size:1.4rem;
+      z-index:5;
+      box-shadow:0 6px 18px rgba(34,197,94,.35);
+      transition:left .22s,top .22s;
+      font-weight:900;
+    }
+
+    svg.path {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:3;
+    }
+
+    /* Algoritma ievade */
+        .command-box {
+      min-height:64px;
+      background:#020617;
+      border:2px dashed rgba(134,239,172,.45);
+      border-radius:16px;
+      padding:10px;
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+    }
+
+    .arrow-chip {
+      min-width:42px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.35);
+      background:#0f172a;
+      color:#f8fafc;
+      display:grid;
+      place-items:center;
+      font-size:1.5rem;
+      font-weight:900;
+      box-shadow:0 2px 10px rgba(0,0,0,.24);
+    }
+
+    .palette {
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:8px;
+      margin:12px 0;
+    }
+
+    button {
+      font:inherit;
+    }
+
+    .btn {
+      border:1px solid rgba(148,163,184,.25);
+      border-radius:14px;
+      padding:11px 12px;
+      background:#0f172a;
+      color:#f8fafc;
+      cursor:pointer;
+      font-weight:800;
+      box-shadow:0 3px 12px rgba(0,0,0,.24);
+    }
+
+    .btn:hover {
+      transform:translateY(-1px);
+      background:#1e293b;
+    }
+
+    .btn.primary {
+      background:#16a34a;
+      color:#f0fdf4;
+      border-color:#22c55e;
+    }
+
+    .btn.primary:hover {
+      background:#15803d;
+    }
+
+    .btn.warn {
+      background:#713f12;
+      color:#fef3c7;
+      border-color:#a16207;
+    }
+
+    .btn.warn:hover {
+      background:#854d0e;
+    }
+
+    .btn.danger {
+      background:#7f1d1d;
+      color:#ffe4e6;
+      border-color:#be123c;
+    }
+
+    .btn.danger:hover {
+      background:#991b1b;
+    }
+
+    .actions {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    /* Ziņojumi un vadība */
+        .message {
+      margin-top:12px;
+      padding:12px;
+      border-radius:14px;
+      background:#020617;
+      color:var(--muted);
+      min-height:48px;
+      line-height:1.4;
+      border:1px solid rgba(148,163,184,.20);
+    }
+
+    .message.ok {
+      background:#052e16;
+      color:#bbf7d0;
+      border-color:#16a34a;
+    }
+
+    .message.bad {
+      background:#450a0a;
+      color:#fecaca;
+      border-color:#dc2626;
+    }
+
+    .teacher {
+      margin-top:12px;
+      border-top:1px solid rgba(148,163,184,.24);
+      padding-top:12px;
+    }
+
+    .solution {
+      display:none;
+      margin-top:8px;
+      background:#020617;
+      border:1px solid rgba(148,163,184,.24);
+      border-radius:14px;
+      padding:10px;
+      line-height:1.9;
+      font-size:1.25rem;
+      letter-spacing:.08em;
+      word-break:break-word;
+      color:#f8fafc;
+    }
+
+    .solution.show {
+      display:block;
+    }
+
+    .page-controls {
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:16px;
+      flex-wrap:wrap;
+    }
+
+    .home-link {
+      display:none;
+      text-decoration:none;
+      text-align:center;
+    }
+
+    .home-link.show {
+      display:inline-block;
+    }
+
+    .task-note {
+      background:#071b12;
+      border-left:5px solid var(--accent);
+      border-radius:12px;
+      padding:10px 12px;
+      color:#dcfce7;
+      margin-top:12px;
+      line-height:1.45;
+    }
+
+    /* Kājene */
+    .footer-note {
+      color: var(--muted);
+      line-height: 1.35;
+      margin: 20px auto 0;
+      text-align: center;
+    }
+
+    /* Pieejamība */
+        .sr-only {
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
   </style>
 </head>
 <body>
@@ -148,15 +537,17 @@
         <div class="page-controls">
           <button class="btn" id="prevBtn">Iepriekšējais</button>
           <button class="btn primary" id="nextBtn">Nākamais</button>
+          <a class="btn primary home-link" id="homeBtn" href="index.html">Atgriezties sākumlapā</a>
         </div>
       </aside>
     </section>
 
-    <p class="footer-note">Materiāla ideja veidota pēc Start (IT) datorikas uzdevuma. <br><br>
-    &copy 2026 Inese Germane</p>
+    <p class="footer-note">Materiāla ideja veidota pēc Start (IT) datorikas uzdevuma. <br>
+    &copy; 2026 Inese Germane</p>
   </main>
 
   <script>
+    // Uzdevumu dati
     const tasks = [
       {id:1, arrows:"↓↓→→", note:"Īss algoritms: vispirms divi soļi uz leju, pēc tam divi soļi pa labi."},
       {id:2, arrows:"←←←↓", note:"Algoritms var sākties arī ar kustību pa kreisi."},
@@ -173,11 +564,13 @@
       {id:13, arrows:"↓↓↓→→↓←→→→←↑→→↑↑↑←←←←←", solutions:["↓↓↓→→↓←→→→←↑→→↑↑↑←←←←←", "→→→→→↓↓↓←←↓→←←←→↑←←↑↑↑"], note:"Noslēguma uzdevums: garš algoritms ar daudziem soļiem. Pieņemti divi sākuma virzieni. Punktu var iegūt par katru virzienu."}
     ];
 
+    // Kustību virzieni
     const dir = {
       "→":[1,0], "←":[-1,0], "↑":[0,-1], "↓":[0,1],
       "↖":[-1,-1], "↙":[-1,1], "↗":[1,-1], "↘":[1,1]
     };
 
+    // Spēles stāvoklis
     let current = 0;
     let user = [];
     let done = new Set();
@@ -193,6 +586,7 @@
     const solution = document.getElementById("solution");
     const nav = document.getElementById("levelNav");
 
+    // Palīgfunkcijas
     function acceptedSolutions(task){
       return task.solutions || [task.arrows];
     }
@@ -236,6 +630,7 @@
       };
     }
 
+    // Režģa zīmēšana
     function drawGrid(){
       const task = tasks[current];
       const layout = taskLayout(task);
@@ -303,6 +698,7 @@
       grid.appendChild(f);
     }
 
+    // Lietotāja saskarnes pārzīmēšana
     function renderNav(){
       nav.innerHTML = "";
       tasks.forEach((t, i) => {
@@ -331,6 +727,7 @@
       document.getElementById("taskNote").textContent = task.note;
       document.getElementById("prevBtn").disabled = current === 0;
       document.getElementById("nextBtn").disabled = current === tasks.length - 1;
+      document.getElementById("homeBtn").classList.toggle("show", current === tasks.length - 1);
       if(solution){
         solution.innerHTML = acceptedSolutions(task)
           .map((s, i) => `${i + 1}. variants: ${s.split("").join(" ")}`)
@@ -367,6 +764,7 @@
       message.className = "message" + (type ? " " + type : "");
     }
 
+    // Lietotāja darbības
     function addArrow(a){
       if(user.length >= tasks[current].arrows.length + 4){
         setMessage("Algoritms kļūst pārāk garš. Izdzēs liekos soļus.", "bad");
@@ -512,6 +910,7 @@
       render();
     }
 
+    // Notikumu apstrādātāji
     document.querySelectorAll("[data-arrow]").forEach(b => {
       b.addEventListener("click", () => addArrow(b.dataset.arrow));
     });
